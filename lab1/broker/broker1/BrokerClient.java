@@ -6,6 +6,8 @@ public class BrokerClient{
 	public static void main(String[] args){
 		String host=null;
 		int port=-1;
+		ObjectOutputStream out = null;
+		ObjectInputStream in = null;
 		try{
 			if(args.length == 2 ) {
 				host=args[0];
@@ -18,21 +20,27 @@ public class BrokerClient{
 			Socket socket=new Socket(host, port);
 			Scanner scr = new Scanner(System.in);	
 			BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-			ObjectInputStream socket_reader=new ObjectInputStream(socket.getInputStream()); //for reading lines
-			ObjectOutputStream writer=new ObjectOutputStream(socket.getOutputStream());
+		
+			out = new ObjectOutputStream(socket.getOutputStream());
+			in = new ObjectInputStream(socket.getInputStream());
 
 			System.out.print("CONSOLE>");	
 			String request=null;
 			while((request = scr.next()) != null
 				&& request.toLowerCase().indexOf("bye") == -1){
-				BrokerPacket packet=new BrokerPacket();
-				packet.type=BrokerPacket.BROKER_REQUEST; 
-				packet.symbol=request;
-				writer.writeObject(packet);
+				/* make a new request packet */
+				BrokerPacket packetToServer = new BrokerPacket();
+				packetToServer.type = BrokerPacket.BROKER_REQUEST;
+				packetToServer.symbol = request;
+				out.writeObject(packetToServer);
 
-				BrokerPacket reply=(BrokerPacket)socket_reader.readObject();
-				if (reply.type == BrokerPacket.BROKER_QUOTE)
-					System.out.println("Quote from broker: "+reply.symbol);
+				/* print server reply */
+				BrokerPacket packetFromServer;
+				packetFromServer = (BrokerPacket) in.readObject();
+
+				if (packetFromServer.type == BrokerPacket.BROKER_QUOTE )
+					System.out.println("Quote from broker: " + packetFromServer.symbol);
+
 				/* re-print console prompt */
 				System.out.print("CONSOLE>");
 
@@ -41,10 +49,10 @@ public class BrokerClient{
 			BrokerPacket packetToServer = new BrokerPacket();
 			packetToServer.type = BrokerPacket.BROKER_BYE ;
 			packetToServer.symbol = "Bye!";
-			writer.writeObject(packetToServer);
+			out.writeObject(packetToServer);
 
-			writer.close();
-			socket_reader.close();
+			out.close();
+			in.close();
 			reader.close();
 			socket.close();
 
