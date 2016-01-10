@@ -1,5 +1,6 @@
 import java.net.*;
 import java.io.*;
+import java.util.*;
 
 public class OnlineBroker {
     public static void main(String[] args) throws IOException {
@@ -18,6 +19,16 @@ public class OnlineBroker {
             System.exit(-1);
         }
 
+        HashMap<String,Integer> map=new HashMap<String,Integer>(); 
+        try{
+            Scanner scr=new Scanner(new File("nasdaq"));
+            while(scr.hasNext()){
+                map.put(scr.next().toLowerCase(),scr.nextInt());
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        
         while (listening) {
         	new BrokerServerHandlerThread(serverSocket.accept()).start();
         }

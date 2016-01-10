@@ -19,7 +19,7 @@ public class BrokerServerHandlerThread extends Thread{
 		try{
 			Scanner scr=new Scanner(new File("nasdaq"));
 			while(scr.hasNext()){
-				map.put(scr.next(),scr.nextInt());
+				map.put(scr.next().toLowerCase(),scr.nextInt());
 			}
 		}catch(Exception e){
 			e.printStackTrace();
@@ -38,12 +38,13 @@ public class BrokerServerHandlerThread extends Thread{
 			while (( packetFromClient = (BrokerPacket) fromClient.readObject()) != null) {
 				/* create a packet to send reply back to client */
 				BrokerPacket packetToClient = new BrokerPacket();
-				packetToClient.type = BrokerPacket.BROKER_QUOTE;
+				
 				
 				/* process message */
 				/* just echo in this example */
 				if(packetFromClient.type == BrokerPacket.BROKER_REQUEST) {
-					if(map.get(packetFromClient.symbol)==null)
+					packetToClient.type = BrokerPacket.BROKER_QUOTE;
+					if(map.get(packetFromClient.symbol.toLowerCase())==null)
 						packetToClient.symbol = "0";
 					else
 						packetToClient.symbol = map.get(packetFromClient.symbol)+"";
@@ -55,9 +56,76 @@ public class BrokerServerHandlerThread extends Thread{
 					/* wait for next packet */
 					continue;
 				}
+
+				
+				else if(packetFromClient.type == BrokerPacket.EXCHANGE_ADD) {	
+					packetToClient.type = BrokerPacket.EXCHANGE_REPLY;
+					if(map.get(packetFromClient.symbol.toLowerCase())==null){
+						packetToClient.symbol = packetFromClient.symbol.toUpperCase()+" added";
+						map.put(packetFromClient.symbol.toLowerCase(),-1);
+					}
+					else
+						packetToClient.symbol = packetFromClient.symbol.toUpperCase()+" exists";
+					System.out.println("From Client: " + packetFromClient.symbol);
+				
+					/* send reply back to client */
+					toClient.writeObject(packetToClient);
+					
+					/* wait for next packet */
+					continue;
+				}
+
+				else if(packetFromClient.type == BrokerPacket.EXCHANGE_UPDATE) {
+					packetToClient.type = BrokerPacket.EXCHANGE_REPLY;
+					String cmd[]=new String[2];
+					StringTokenizer st = new StringTokenizer(packetFromClient.symbol);
+					for(int i=0;i<2;i++){
+						cmd[i]=null;
+						if(st.hasMoreTokens())
+							cmd[i]=st.nextToken();
+					}	
+
+					if(map.get(cmd[0].toLowerCase())==null){
+						packetToClient.symbol = packetFromClient.symbol.toUpperCase()+" invalid";
+					}
+					else{
+						if(Integer.parseInt(cmd[1])>300||Integer.parseInt(cmd[1])<1)
+							packetToClient.symbol = packetFromClient.symbol.toUpperCase()+" out of range.";
+						else{
+							map.put(cmd[0].toLowerCase(),Integer.parseInt(cmd[1]));
+							packetToClient.symbol = packetFromClient.symbol.toUpperCase()+" updated to "+cmd[1];
+						}
+					}
+					System.out.println("From Client: " + packetFromClient.symbol);
+				
+					/* send reply back to client */
+					
+					toClient.writeObject(packetToClient);
+					
+					/* wait for next packet */
+					continue;
+				}
+
+				else if(packetFromClient.type == BrokerPacket.EXCHANGE_REMOVE) {	
+					packetToClient.type = BrokerPacket.EXCHANGE_REPLY;
+					if(map.get(packetFromClient.symbol.toLowerCase())==null){
+						packetToClient.symbol = packetFromClient.symbol.toUpperCase()+" invalid";
+					}
+					else{
+						map.remove(packetFromClient.symbol.toLowerCase());
+						packetToClient.symbol = packetFromClient.symbol.toUpperCase()+" removed";			
+					}
+					System.out.println("From Client: " + packetFromClient.symbol);
+				
+					/* send reply back to client */
+					toClient.writeObject(packetToClient);
+					
+					/* wait for next packet */
+					continue;
+				}
 				
 				/* Sending an ECHO_NULL || ECHO_BYE means quit */
-				if (packetFromClient.type == BrokerPacket.BROKER_NULL || packetFromClient.type == BrokerPacket.BROKER_BYE) {
+				else if (packetFromClient.type == BrokerPacket.BROKER_NULL || packetFromClient.type == BrokerPacket.BROKER_BYE) {
 					gotByePacket = true;
 					packetToClient = new BrokerPacket();
 					packetToClient.type = BrokerPacket.BROKER_BYE;
@@ -65,10 +133,13 @@ public class BrokerServerHandlerThread extends Thread{
 					toClient.writeObject(packetToClient);
 					break;
 				}
+				else{
+					/* if code comes here, there is an error in the packet */
+					//System.out.println(packetFromClient.type);
+					System.err.println("ERROR: Unknown BROKER_* packet!!");
+					System.exit(-1);
+				}
 				
-				/* if code comes here, there is an error in the packet */
-				System.err.println("ERROR: Unknown BROKER_* packet!!");
-				System.exit(-1);
 			}
 			
 			/* cleanup when client exits */

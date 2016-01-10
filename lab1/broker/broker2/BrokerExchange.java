@@ -40,24 +40,19 @@ public class BrokerExchange{
 				if(!(cmd[0].toLowerCase().equals("add")||cmd[0].toLowerCase().equals("update")||cmd[0].toLowerCase().equals("remove")))
 					continue;
 				BrokerPacket packetToServer = new BrokerPacket();
-				if(cmd[0].toLowerCase().equals("add"))
+				if(cmd[0].toLowerCase().equals("add")){
 					packetToServer.type = BrokerPacket.EXCHANGE_ADD;
+				}
 				if(cmd[0].toLowerCase().equals("remove"))
 					packetToServer.type = BrokerPacket.EXCHANGE_REMOVE;
 				packetToServer.symbol = cmd[1];
-				
-				/*
-				System.out.println("symbol:------------- ");
-				System.out.println("symbol: "+cmd[1]);
-				System.out.println("symbol:------------- ");
-				*/
 				
 				if(cmd[0].toLowerCase().equals("update")){
 					//two parameters
 					packetToServer.type = BrokerPacket.EXCHANGE_UPDATE;
 					packetToServer.symbol = cmd[1]+" "+cmd[2];
 				}
-				System.out.println(packetToServer.symbol);	
+				//System.out.println(packetToServer.symbol);	
 				out.writeObject(packetToServer);
 
 				/* print server reply */
