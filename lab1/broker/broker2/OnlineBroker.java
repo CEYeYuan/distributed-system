@@ -1,6 +1,7 @@
 import java.net.*;
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.*;
 
 public class OnlineBroker {
     public static void main(String[] args) throws IOException {
@@ -19,7 +20,7 @@ public class OnlineBroker {
             System.exit(-1);
         }
 
-        HashMap<String,Integer> map=new HashMap<String,Integer>(); 
+        ConcurrentHashMap<String,Integer> map=new  ConcurrentHashMap<String,Integer>(); 
         try{
             Scanner scr=new Scanner(new File("nasdaq"));
             while(scr.hasNext()){
@@ -30,7 +31,8 @@ public class OnlineBroker {
         }
         
         while (listening) {
-        	new BrokerServerHandlerThread(serverSocket.accept()).start();
+            new Thread(new BrokerServerHandlerThread(serverSocket.accept(),map)).start();
+        	
         }
 
         serverSocket.close();

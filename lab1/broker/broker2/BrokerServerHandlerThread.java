@@ -1,12 +1,14 @@
 import java.net.*;
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.*;
 
-public class BrokerServerHandlerThread extends Thread{
+public class BrokerServerHandlerThread implements Runnable{
 	private Socket socket = null;
+	private ConcurrentHashMap<String,Integer> map=null;
 
-	public BrokerServerHandlerThread(Socket socket) {
-		super("BrokererverHandlerThread");
+	public BrokerServerHandlerThread(Socket socket,ConcurrentHashMap<String,Integer> map) {
+		this.map=map;
 		this.socket = socket;
 		System.out.println("Created new Thread to handle client");
 	}
@@ -14,17 +16,6 @@ public class BrokerServerHandlerThread extends Thread{
 	public void run() {
 
 		boolean gotByePacket = false;
-		HashMap<String,Integer> map=new HashMap<String,Integer>();
-		
-		try{
-			Scanner scr=new Scanner(new File("nasdaq"));
-			while(scr.hasNext()){
-				map.put(scr.next().toLowerCase(),scr.nextInt());
-			}
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		
 		try {
 
 			/* stream to read from client */
@@ -44,7 +35,7 @@ public class BrokerServerHandlerThread extends Thread{
 				/* just echo in this example */
 				if(packetFromClient.type == BrokerPacket.BROKER_REQUEST) {
 					packetToClient.type = BrokerPacket.BROKER_QUOTE;
-					if(map.get(packetFromClient.symbol.toLowerCase())==null)
+					if(map.get(packetFromClient.symbol.toLowerCase())==null||map.get(packetFromClient.symbol.toLowerCase())==-1)
 						packetToClient.symbol = "0";
 					else
 						packetToClient.symbol = map.get(packetFromClient.symbol)+"";
