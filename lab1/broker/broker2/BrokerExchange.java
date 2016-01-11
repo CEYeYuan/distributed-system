@@ -59,9 +59,11 @@ public class BrokerExchange{
 				BrokerPacket packetFromServer;
 				packetFromServer = (BrokerPacket) in.readObject();
 
-				if (packetFromServer.type == BrokerPacket.EXCHANGE_REPLY)
+				if (packetFromServer.type ==BrokerPacket.EXCHANGE_REPLY)
 					System.out.println(packetFromServer.symbol);
-
+				if ((packetFromServer.type ==BrokerPacket.ERROR_INVALID_SYMBOL)||
+					(packetFromServer.type ==BrokerPacket.ERROR_OUT_OF_RANGE)||(packetFromServer.type ==BrokerPacket.ERROR_SYMBOL_EXISTS))
+					System.out.println("Error: "+packetFromServer.symbol);
 				/* re-print console prompt */
 				System.out.print("CONSOLE>");
 

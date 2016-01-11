@@ -35,8 +35,10 @@ public class BrokerServerHandlerThread implements Runnable{
 				/* just echo in this example */
 				if(packetFromClient.type == BrokerPacket.BROKER_REQUEST) {
 					packetToClient.type = BrokerPacket.BROKER_QUOTE;
-					if(map.get(packetFromClient.symbol.toLowerCase())==null||map.get(packetFromClient.symbol.toLowerCase())==-1)
+					if(map.get(packetFromClient.symbol.toLowerCase())==null||map.get(packetFromClient.symbol.toLowerCase())==0){
+						packetToClient.type = BrokerPacket.BROKER_ERROR;
 						packetToClient.symbol = "0";
+					}
 					else
 						packetToClient.symbol = map.get(packetFromClient.symbol)+"";
 					System.out.println("From Client: " + packetFromClient.symbol);
@@ -53,10 +55,12 @@ public class BrokerServerHandlerThread implements Runnable{
 					packetToClient.type = BrokerPacket.EXCHANGE_REPLY;
 					if(map.get(packetFromClient.symbol.toLowerCase())==null){
 						packetToClient.symbol = packetFromClient.symbol.toUpperCase()+" added";
-						map.put(packetFromClient.symbol.toLowerCase(),-1);
+						map.put(packetFromClient.symbol.toLowerCase(),0);
 					}
-					else
+					else{
+						packetToClient.type = BrokerPacket.ERROR_SYMBOL_EXISTS;
 						packetToClient.symbol = packetFromClient.symbol.toUpperCase()+" exists";
+					}
 					System.out.println("From Client: " + packetFromClient.symbol);
 				
 					/* send reply back to client */
@@ -77,11 +81,14 @@ public class BrokerServerHandlerThread implements Runnable{
 					}	
 
 					if(map.get(cmd[0].toLowerCase())==null){
+						packetToClient.type = BrokerPacket.ERROR_INVALID_SYMBOL;
 						packetToClient.symbol = packetFromClient.symbol.toUpperCase()+" invalid";
 					}
 					else{
-						if(Integer.parseInt(cmd[1])>300||Integer.parseInt(cmd[1])<1)
+						if(Integer.parseInt(cmd[1])>300||Integer.parseInt(cmd[1])<1){
+							packetToClient.type = BrokerPacket.ERROR_OUT_OF_RANGE;
 							packetToClient.symbol = packetFromClient.symbol.toUpperCase()+" out of range.";
+						}
 						else{
 							map.put(cmd[0].toLowerCase(),Integer.parseInt(cmd[1]));
 							packetToClient.symbol = packetFromClient.symbol.toUpperCase()+" updated to "+cmd[1];
@@ -100,6 +107,7 @@ public class BrokerServerHandlerThread implements Runnable{
 				else if(packetFromClient.type == BrokerPacket.EXCHANGE_REMOVE) {	
 					packetToClient.type = BrokerPacket.EXCHANGE_REPLY;
 					if(map.get(packetFromClient.symbol.toLowerCase())==null){
+						packetToClient.type = BrokerPacket.ERROR_INVALID_SYMBOL;
 						packetToClient.symbol = packetFromClient.symbol.toUpperCase()+" invalid";
 					}
 					else{

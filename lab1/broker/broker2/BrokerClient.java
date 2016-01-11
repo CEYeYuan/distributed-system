@@ -38,9 +38,10 @@ public class BrokerClient{
 				BrokerPacket packetFromServer;
 				packetFromServer = (BrokerPacket) in.readObject();
 
-				if (packetFromServer.type == BrokerPacket.BROKER_QUOTE )
+				if (packetFromServer.type == BrokerPacket.BROKER_QUOTE)
 					System.out.println("Quote from broker: " + packetFromServer.symbol);
-
+				if(packetFromServer.type == BrokerPacket.BROKER_ERROR)
+					System.out.println("Error: " + packetFromServer.symbol);
 				/* re-print console prompt */
 				System.out.print("CONSOLE>");
 
