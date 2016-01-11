@@ -141,7 +141,7 @@ public class BrokerServerHandlerThread implements Runnable{
 				
 			}
 			
-			/* cleanup when client exits */
+			
 			fromClient.close();
 			toClient.close();
 			socket.close();
@@ -152,6 +152,21 @@ public class BrokerServerHandlerThread implements Runnable{
 		} catch (ClassNotFoundException e) {
 			if(!gotByePacket)
 				e.printStackTrace();
+		}
+		finally{
+			  /* cleanup when client exits */
+			try{
+				 PrintWriter writer = new PrintWriter("nasdaq");
+	            //update the new file
+	            writer.print("");
+	            for(String key:map.keySet()){
+	                 writer.format("%s %d\n", key, map.get(key));
+	            }
+	            writer.close();
+			}catch (Exception e){
+				e.printStackTrace();
+			}
+           
 		}
 	}
 }

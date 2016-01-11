@@ -20,7 +20,7 @@ public class OnlineBroker {
             System.exit(-1);
         }
 
-        ConcurrentHashMap<String,Integer> map=new  ConcurrentHashMap<String,Integer>(); 
+        ConcurrentHashMap<String,Integer> map=new ConcurrentHashMap<String,Integer>(); 
         try{
             Scanner scr=new Scanner(new File("nasdaq"));
             while(scr.hasNext()){
@@ -32,7 +32,7 @@ public class OnlineBroker {
         
         while (listening) {
             new Thread(new BrokerServerHandlerThread(serverSocket.accept(),map)).start();
-        	
+          
         }
 
         serverSocket.close();
