@@ -31,7 +31,7 @@ public class BrokerClient{
 			System.out.print("CONSOLE>");	
 			String request=null;
 			/**************lookup server-> parse broker server********/
-			while((request = scr.next()) != null){
+			while((request = scr.nextLine()) != null){
 				String cmd[]=new String[2];
 				StringTokenizer st = new StringTokenizer(request);
 				for(int i=0;i<2;i++){
@@ -45,7 +45,8 @@ public class BrokerClient{
 				}
 				BrokerPacket packetToServer = new BrokerPacket();
 				packetToServer.type = BrokerPacket.LOOKUP_REQUEST;
-				packetToServer.symbol = request;
+				System.out.println("cmd[0]=="+cmd[0]+"  cmd[1]=="+cmd[1]);
+				packetToServer.symbol = cmd[1];
 				out_lookup.writeObject(packetToServer);
 
 					/* print server reply */
@@ -64,7 +65,7 @@ public class BrokerClient{
 						socket=new Socket(host, port);
 						out = new ObjectOutputStream(socket.getOutputStream());
 						in = new ObjectInputStream(socket.getInputStream());
-
+						break;
 					}
 					catch(Exception e){
 						e.printStackTrace();

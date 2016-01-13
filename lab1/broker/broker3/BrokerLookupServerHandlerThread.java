@@ -11,7 +11,7 @@ public class BrokerLookupServerHandlerThread implements Runnable{
 	public BrokerLookupServerHandlerThread(Socket socket,ConcurrentHashMap<String,ArrayList<BrokerLocation>> map) {
 		this.map=map;
 		this.socket = socket;
-		System.out.println("Created new Thread to handle server registration");
+		System.out.println("Created new Thread to handle server lookup/register");
 	}
 
 	public void run() {
@@ -24,8 +24,7 @@ public class BrokerLookupServerHandlerThread implements Runnable{
 			BrokerPacket packetFromClient;
 			
 			/* stream to write back to client */
-			ObjectOutputStream toClient = new ObjectOutputStream(socket.getOutputStream());
-			
+			ObjectOutputStream toClient = new ObjectOutputStream(socket.getOutputStream());				
 
 			while (( packetFromClient = (BrokerPacket) fromClient.readObject()) != null) {
 				/* create a packet to send reply back to client */
@@ -53,10 +52,13 @@ public class BrokerLookupServerHandlerThread implements Runnable{
 				}
 
 				if(packetFromClient.type==BrokerPacket.LOOKUP_REQUEST){
-					if(map.get(packetFromClient.symbol)==null){
+					String str=packetFromClient.symbol;
+					System.out.println(str);
+					if(map.get(str)==null){
 						packetToClient.symbol=packetFromClient.symbol+ " not found, try again";
 						System.out.println(packetFromClient.symbol+ " not found, try again");
-					}else{
+					}
+					else{
 						ArrayList<BrokerLocation> list=map.get(packetFromClient.symbol);
 						Random rg = new Random();
 						packetToClient.symbol=list.get(rg.nextInt(list.size())).toString();
