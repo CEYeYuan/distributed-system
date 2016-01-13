@@ -69,10 +69,7 @@ public class BrokerLookupServerHandlerThread implements Runnable{
 					
 					/* wait for next packet */
 					continue;
-				}
-				
-				
-				
+				}		
 			}
 			
 			
