@@ -6,10 +6,12 @@ import java.util.concurrent.*;
 public class BrokerServerHandlerThread implements Runnable{
 	private Socket socket = null;
 	private ConcurrentHashMap<String,Integer> map=null;
+	private String broker=null;
 
-	public BrokerServerHandlerThread(Socket socket,ConcurrentHashMap<String,Integer> map) {
+	public BrokerServerHandlerThread(Socket socket,ConcurrentHashMap<String,Integer> map,String broker) {
 		this.map=map;
 		this.socket = socket;
+		this.broker=broker;
 		System.out.println("Created new Thread to handle client");
 	}
 
@@ -156,7 +158,7 @@ public class BrokerServerHandlerThread implements Runnable{
 		finally{
 			  /* cleanup when client exits */
 			try{
-				 PrintWriter writer = new PrintWriter("nasdaq");
+				 PrintWriter writer = new PrintWriter(broker);
 	            //update the new file
 	            writer.print("");
 	            for(String key:map.keySet()){

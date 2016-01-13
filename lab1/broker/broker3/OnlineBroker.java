@@ -6,23 +6,47 @@ import java.util.concurrent.*;
 public class OnlineBroker {
     public static void main(String[] args) throws IOException {
         ServerSocket serverSocket = null;
+        Socket socket_lookup=null;
         boolean listening = true;
 
         try {
-        	if(args.length == 1) {
-        		serverSocket = new ServerSocket(Integer.parseInt(args[0]));
+        	if(args.length == 4) {
+        		serverSocket = new ServerSocket(Integer.parseInt(args[2]));
+                socket_lookup=new Socket(args[0],Integer.parseInt(args[1]));
+                ObjectOutputStream out_lookup = new ObjectOutputStream(socket_lookup.getOutputStream());
+                ObjectInputStream in_lookup = new ObjectInputStream(socket_lookup.getInputStream());
+                while(true){
+                    BrokerPacket packetToServer = new BrokerPacket();
+                    packetToServer.type = BrokerPacket.LOOKUP_REGISTER;
+                    packetToServer.locations=new BrokerLocation[]{new  BrokerLocation(InetAddress.getLocalHost().getHostAddress(),Integer.parseInt(args[2]))};
+                    System.out.println();
+                    packetToServer.symbol =args[3];
+                    System.out.println(packetToServer.symbol);
+                    out_lookup.writeObject(packetToServer);
+
+                        /* print server reply */
+                    BrokerPacket packetFromServer;
+                    packetFromServer = (BrokerPacket) in_lookup.readObject();
+                    System.out.println(packetFromServer.symbol);
+                    if(packetFromServer.symbol.indexOf("not")!=-1){
+                        System.out.println("not found, try it again");
+                        continue;
+                    }
+                    break;
+                }
+
         	} else {
         		System.err.println("ERROR: Invalid arguments!");
         		System.exit(-1);
         	}
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.err.println("ERROR: Could not listen on port!");
             System.exit(-1);
         }
 
         ConcurrentHashMap<String,Integer> map=new ConcurrentHashMap<String,Integer>(); 
         try{
-            Scanner scr=new Scanner(new File("nasdaq"));
+            Scanner scr=new Scanner(new File(args[3]));
             while(scr.hasNext()){
                 map.put(scr.next().toLowerCase(),scr.nextInt());
             }
@@ -31,7 +55,7 @@ public class OnlineBroker {
         }
         
         while (listening) {
-            new Thread(new BrokerServerHandlerThread(serverSocket.accept(),map)).start();
+            new Thread(new BrokerServerHandlerThread(serverSocket.accept(),map,args[3])).start();
           
         }
 

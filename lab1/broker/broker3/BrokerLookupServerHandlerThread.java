@@ -29,7 +29,6 @@ public class BrokerLookupServerHandlerThread implements Runnable{
 			while (( packetFromClient = (BrokerPacket) fromClient.readObject()) != null) {
 				/* create a packet to send reply back to client */
 				BrokerPacket packetToClient = new BrokerPacket();
-
 				if(packetFromClient.type == BrokerPacket.LOOKUP_REGISTER){
 					ArrayList list=null;
 					if(map.get(packetFromClient.symbol)==null){
@@ -45,8 +44,15 @@ public class BrokerLookupServerHandlerThread implements Runnable{
 					packetToClient.type=BrokerPacket.LOOKUP_REPLY;
 					packetToClient.symbol=packetFromClient.symbol+ " registered";
 					System.out.println(packetFromClient.symbol+ " registered");
+					/**********************************************************
+						print the hash map: debug purpose only 
+					System.out.println("**************************************");
+					for(String s:map.keySet()){
+						System.out.println(s+"  "+map.get(s));
+					}
 					toClient.writeObject(packetToClient);
-					
+					System.out.println("**************************************");
+					***************************************************************/
 					/* wait for next packet */
 					continue;
 				}
