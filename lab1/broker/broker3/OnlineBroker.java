@@ -8,21 +8,21 @@ public class OnlineBroker {
         ServerSocket serverSocket = null;
         Socket socket_lookup=null;
         boolean listening = true;
-
+        ObjectOutputStream out_lookup=null;
+        ObjectInputStream in_lookup=null;
         try {
         	if(args.length == 4) {
-        		serverSocket = new ServerSocket(Integer.parseInt(args[2]));
                 socket_lookup=new Socket(args[0],Integer.parseInt(args[1]));
-                ObjectOutputStream out_lookup = new ObjectOutputStream(socket_lookup.getOutputStream());
-                ObjectInputStream in_lookup = new ObjectInputStream(socket_lookup.getInputStream());
+                out_lookup = new ObjectOutputStream(socket_lookup.getOutputStream());
+                in_lookup = new ObjectInputStream(socket_lookup.getInputStream());
                 while(true){
                     BrokerPacket packetToServer = new BrokerPacket();
                     packetToServer.type = BrokerPacket.LOOKUP_REGISTER;
                     packetToServer.locations=new BrokerLocation[]{new  BrokerLocation(InetAddress.getLocalHost().getHostAddress(),Integer.parseInt(args[2]))};
                     System.out.println();
                     packetToServer.symbol =args[3];
-                    System.out.println(packetToServer.symbol);
                     out_lookup.writeObject(packetToServer);
+
 
                         /* print server reply */
                     BrokerPacket packetFromServer;
@@ -33,7 +33,7 @@ public class OnlineBroker {
                         continue;
                     }
                     break;
-                }
+               }
 
         	} else {
         		System.err.println("ERROR: Invalid arguments!");
@@ -43,6 +43,12 @@ public class OnlineBroker {
             System.err.println("ERROR: Could not listen on port!");
             System.exit(-1);
         }
+
+        in_lookup.close();
+        out_lookup.close();
+        socket_lookup.close();
+        System.out.println("now operates as a server");
+        serverSocket = new ServerSocket(Integer.parseInt(args[2]));
 
         ConcurrentHashMap<String,Integer> map=new ConcurrentHashMap<String,Integer>(); 
         try{

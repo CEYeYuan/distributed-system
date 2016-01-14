@@ -31,6 +31,7 @@ public class BrokerClient{
 			System.out.print("CONSOLE>");	
 			String request=null;
 			/**************lookup server-> parse broker server********/
+			System.out.println("Setting up the default broker");
 			while((request = scr.nextLine()) != null){
 				String cmd[]=new String[2];
 				StringTokenizer st = new StringTokenizer(request);
@@ -45,48 +46,53 @@ public class BrokerClient{
 				}
 				BrokerPacket packetToServer = new BrokerPacket();
 				packetToServer.type = BrokerPacket.LOOKUP_REQUEST;
-				System.out.println("cmd[0]=="+cmd[0]+"  cmd[1]=="+cmd[1]);
+				//System.out.println("cmd[0]=="+cmd[0]+"  cmd[1]=="+cmd[1]);
 				packetToServer.symbol = cmd[1];
 				out_lookup.writeObject(packetToServer);
 
 					/* print server reply */
 				BrokerPacket packetFromServer;
 				packetFromServer = (BrokerPacket) in_lookup.readObject();
-				System.out.println(packetFromServer.symbol);
+				//System.out.println(packetFromServer.symbol);
 				if(packetFromServer.symbol.indexOf("not")!=-1){
 					System.out.println("not found, try it again");
 					continue;
 				}else{
-					try{
-						int start=packetFromServer.symbol.indexOf(" HOST: ");
-						int end= packetFromServer.symbol.indexOf(" PORT: ");
-						host=packetFromServer.symbol.substring(start+8,end);
-						port=Integer.parseInt(packetFromServer.symbol.substring(end+8));
-						socket=new Socket(host, port);
-						out = new ObjectOutputStream(socket.getOutputStream());
-						in = new ObjectInputStream(socket.getInputStream());
-						break;
-					}
-					catch(Exception e){
-						e.printStackTrace();
-					}
-
-
+					int start=packetFromServer.symbol.indexOf(" HOST: ");
+					int end= packetFromServer.symbol.indexOf("PORT: ");
+					host=packetFromServer.symbol.substring(start+7,end);
+					port=Integer.parseInt(packetFromServer.symbol.substring(end+6));
+					System.out.println("Host: "+host+" Port: "+port);
+					break;
 				}
 			}
+			out_lookup.close();
+			in_lookup.close();
+			socket_lookup.close();
+			socket=new Socket(host, port);
+			out = new ObjectOutputStream(socket.getOutputStream());
+			boolean inited=false;
+	
 
 			/********************************************************/
 
 
-
+			System.out.println("Now you can lookup the quotes");
 			while((request = scr.next()) != null
 				&& request.toLowerCase().indexOf("bye") == -1){
 				/* make a new request packet */
+
 				BrokerPacket packetToServer = new BrokerPacket();
 				packetToServer.type = BrokerPacket.BROKER_REQUEST;
 				packetToServer.symbol = request;
+				if(inited==false){
+					in = new ObjectInputStream(socket.getInputStream());
+					inited=true;
+				}
+				
 				out.writeObject(packetToServer);
 
+				
 				/* print server reply */
 				BrokerPacket packetFromServer;
 				packetFromServer = (BrokerPacket) in.readObject();
@@ -108,7 +114,7 @@ public class BrokerClient{
 			out.close();
 			in.close();
 			reader.close();
-			socket_lookup.close();
+			socket.close();
 			if(socket!=null)
 				socket.close();
 

@@ -44,6 +44,7 @@ public class BrokerLookupServerHandlerThread implements Runnable{
 					packetToClient.type=BrokerPacket.LOOKUP_REPLY;
 					packetToClient.symbol=packetFromClient.symbol+ " registered";
 					System.out.println(packetFromClient.symbol+ " registered");
+					toClient.writeObject(packetToClient);
 					/**********************************************************
 						print the hash map: debug purpose only 
 					System.out.println("**************************************");
