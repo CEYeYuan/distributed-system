@@ -44,9 +44,6 @@ public class OnlineBroker {
             System.exit(-1);
         }
 
-        in_lookup.close();
-        out_lookup.close();
-        socket_lookup.close();
         System.out.println("now operates as a server");
         serverSocket = new ServerSocket(Integer.parseInt(args[2]));
 
@@ -61,7 +58,7 @@ public class OnlineBroker {
         }
         
         while (listening) {
-            new Thread(new BrokerServerHandlerThread(serverSocket.accept(),map,args[3])).start();
+            new Thread(new BrokerServerHandlerThread(serverSocket.accept(),map,args[3],out_lookup,in_lookup,socket_lookup)).start();
           
         }
 
