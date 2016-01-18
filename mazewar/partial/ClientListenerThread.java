@@ -63,10 +63,9 @@ public class ClientListenerThread implements Runnable {
                 System.out.println("Received " + received);
                 queue.add(received);
                 while(!queue.isEmpty()){
-                    MPacket tmp=queue.peek();
-                    if(tmp.sequenceNumber==seq){
+                    if(queue.peek().sequenceNumber==seq){
                         System.out.println("ececuting seq.: "+seq);
-                        tmp=queue.poll();
+                        received=queue.poll();
                         client = clientTable.get(received.name);
                         if(received.event == MPacket.UP){
                             client.forward();
