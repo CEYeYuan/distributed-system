@@ -33,12 +33,36 @@ public class ClientListenerThread implements Runnable {
                 return p1.sequenceNumber-p2.sequenceNumber;
             }
         });
+       /* while(true){
+            try{
+                received = (MPacket) mSocket.readObject();
+                System.out.println("Received " + received);
+                client = clientTable.get(received.name);
+                if(received.event == MPacket.UP){
+                    client.forward();
+                }else if(received.event == MPacket.DOWN){
+                    client.backup();
+                }else if(received.event == MPacket.LEFT){
+                    client.turnLeft();
+                }else if(received.event == MPacket.RIGHT){
+                    client.turnRight();
+                }else if(received.event == MPacket.FIRE){
+                    client.fire();
+                }else{
+                    throw new UnsupportedOperationException();
+                }    
+            }catch(IOException e){
+                Thread.currentThread().interrupt();    
+            }catch(ClassNotFoundException e){
+                e.printStackTrace();
+            }            
+        }*/
         while(true){
             try{
                 received = (MPacket) mSocket.readObject();
                 System.out.println("Received " + received);
                 queue.add(received);
-                while(true){
+                while(!queue.isEmpty()){
                     MPacket tmp=queue.peek();
                     if(tmp.sequenceNumber==seq){
                         System.out.println("ececuting seq.: "+seq);
