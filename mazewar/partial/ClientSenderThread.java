@@ -16,7 +16,7 @@ public class ClientSenderThread implements Runnable {
     public void run() {
         MPacket toServer = null;
         if(Debug.debug) System.out.println("Starting ClientSenderThread");
-        int seq=0;
+        int seq=1;
         while(true){
             try{                
                 //Take packet from queue

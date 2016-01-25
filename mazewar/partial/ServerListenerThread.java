@@ -27,10 +27,11 @@ public class ServerListenerThread implements Runnable {
             try{
                 received = (MPacket) mSocket.readObject();
                 queue.add(received);
-                if(Debug.debug) System.out.println("Received: " + received);
+              
                     while(!queue.isEmpty()){
                         if(queue.peek().sequenceNumber==seq){
                             received=queue.poll();
+                            if(Debug.debug) System.out.println("Received: " + received);
                             eventQueue.put(received); 
                             seq++;
                         }
