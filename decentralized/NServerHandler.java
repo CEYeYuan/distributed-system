@@ -26,30 +26,37 @@ public class NServerHandler implements Runnable{
 			/* stream to write back to client */
 			ObjectOutputStream toClient = new ObjectOutputStream(socket.getOutputStream());				
 
-			while (( packetFromClient = (NPacket) fromClient.readObject()) != null) {
-				/* create a packet to send reply back to client */
-				NPacket packetToClient = new NPacket();
-				if(packetFromClient.type=NPacket.NSEVER_REGISTER){
-					if(map.get(packetFromClient.symbol)==null){
-						map.put(packetFromClient.symbol,packetFromClient.location);
+			packetFromClient = (NPacket) fromClient.readObject();
+			/* create a packet to send reply back to client */
+			NPacket packetToClient = new NPacket();
+			if(packetFromClient.type==NPacket.NSERVER_REGISTER){
+				if(map.get(packetFromClient.symbol)==null){
+					map.put(packetFromClient.symbol,packetFromClient.location);
 
-						/* send reply back to client */
-						packetToClient.symbol=packetFromClient.symbol+ " registered";
-						System.out.println(packetFromClient.symbol+ " registered");
-						toClient.writeObject(packetToClient);
-					}
-					else{
-						packetToClient.symbol=packetFromClient.symbol+ " already used";
-						System.out.println(packetFromClient.symbol+ " already used");
-						toClient.writeObject(packetToClient);
-					}
+					/* send reply back to client */
+					packetToClient.symbol=packetFromClient.symbol+ " registered";
+					System.out.println(packetFromClient.symbol+ packetFromClient.location.toString());
+					toClient.writeObject(packetToClient);
 				}
-
-				if(packetFromClient.type=NPacket.NSEVER_LOOKUP){
-
+				else{
+					packetToClient.symbol=packetFromClient.symbol+ " already used";
+					System.out.println(packetFromClient.symbol+ " already used");
+					toClient.writeObject(packetToClient);
+					return;//exit current thread
 				}
-					
+			}
+
+			packetFromClient = (NPacket) fromClient.readObject();
+			if(packetFromClient.type==NPacket.NSERVER_LOOKUP){
+				for(String s:map.keySet()){
+					packetToClient.symbol=s;
+					packetToClient.location=map.get(s);
+					toClient.writeObject(packetToClient);
+				}
+			}
 				
+			while(true){
+				;
 			}
 			
 
@@ -59,7 +66,6 @@ public class NServerHandler implements Runnable{
 			toClient.close();
 			socket.close();
 			*/
-				}
 
 		} catch (IOException e) {
 			if(!gotByePacket)

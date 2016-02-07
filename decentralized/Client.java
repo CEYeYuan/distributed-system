@@ -37,7 +37,7 @@ public class Client {
                 out_lookup.writeObject(packetToServer);
 
                 ConcurrentHashMap<String,Location> map=new ConcurrentHashMap<String,Location>();  
-                Thread nlistener=new ClientListenerFromNServer(socket_lookup,map);
+                Thread nlistener=new ClientListenerFromNServer(in_lookup,map);
                 nlistener.start();
 
         	} else {
