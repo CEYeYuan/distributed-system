@@ -16,8 +16,12 @@ public class ClientListenerFromNServer extends Thread{
 			while(true){
 				NPacket packetFromServer;
                 packetFromServer = (NPacket) in.readObject();
+                if(packetFromServer.symbol.indexOf("registered")!=-1)
+                	continue;
+
                 map.put(packetFromServer.symbol,packetFromServer.location);
-                System.out.println("added new client "+packetFromServer.symbol+" "+packetFromServer.location.toString());
+                System.out.println("added new client "+packetFromServer.symbol);
+            	System.out.println(packetFromServer.location.toString());
 				
 			}
 		}

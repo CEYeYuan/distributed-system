@@ -29,31 +29,32 @@ public class NServerHandler implements Runnable{
 			packetFromClient = (NPacket) fromClient.readObject();
 			/* create a packet to send reply back to client */
 			NPacket packetToClient = new NPacket();
-			if(packetFromClient.type==NPacket.NSERVER_REGISTER){
-				if(map.get(packetFromClient.symbol)==null){
-					map.put(packetFromClient.symbol,packetFromClient.location);
+		
+			if(map.get(packetFromClient.symbol)==null){
+				map.put(packetFromClient.symbol,packetFromClient.location);
 
-					/* send reply back to client */
-					packetToClient.symbol=packetFromClient.symbol+ " registered";
-					System.out.println(packetFromClient.symbol+ packetFromClient.location.toString());
-					toClient.writeObject(packetToClient);
-				}
-				else{
-					packetToClient.symbol=packetFromClient.symbol+ " already used";
-					System.out.println(packetFromClient.symbol+ " already used");
-					toClient.writeObject(packetToClient);
-					return;//exit current thread
-				}
+				/* send reply back to client */
+				packetToClient.symbol=packetFromClient.symbol+ " registered";
+				System.out.println(packetFromClient.symbol+ map.get(packetFromClient.symbol).toString());
+				toClient.writeObject(packetToClient);
 			}
+			else{
+				packetToClient.symbol=packetFromClient.symbol+ " already used";
+				System.out.println(packetFromClient.symbol+ " already used");
+				toClient.writeObject(packetToClient);
+				return;//exit current thread
+			}
+			
 
 			packetFromClient = (NPacket) fromClient.readObject();
-			if(packetFromClient.type==NPacket.NSERVER_LOOKUP){
-				for(String s:map.keySet()){
-					packetToClient.symbol=s;
-					packetToClient.location=map.get(s);
-					toClient.writeObject(packetToClient);
-				}
+			
+			for(String s:map.keySet()){
+				packetToClient.symbol=s;
+				packetToClient.location=map.get(s);
+				System.out.println("sending "+s+map.get(s).toString());
+				toClient.writeObject(packetToClient);
 			}
+		
 				
 			while(true){
 				;

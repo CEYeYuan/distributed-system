@@ -17,7 +17,6 @@ public class Client {
                 in_lookup = new ObjectInputStream(socket_lookup.getInputStream());
                
                 NPacket packetToServer = new NPacket();
-                packetToServer.type=NPacket.NSERVER_REGISTER;
                 packetToServer.location=new  Location(InetAddress.getLocalHost().getHostAddress(),Integer.parseInt(args[2]));
                 packetToServer.symbol =args[3];
                 out_lookup.writeObject(packetToServer);
@@ -27,19 +26,18 @@ public class Client {
                 packetFromServer = (NPacket) in_lookup.readObject();
                 System.out.println(packetFromServer.symbol);
                 if(packetFromServer.symbol.indexOf("used")!=-1)
-                    System.exit(-1);
+                    return;
                 //the name is already used, choose another one
-
-                packetToServer = new NPacket();
-                packetToServer.type=NPacket.NSERVER_LOOKUP;
-                packetToServer.location=new  Location(InetAddress.getLocalHost().getHostAddress(),Integer.parseInt(args[2]));
-                packetToServer.symbol =args[3];
-                out_lookup.writeObject(packetToServer);
 
                 ConcurrentHashMap<String,Location> map=new ConcurrentHashMap<String,Location>();  
                 Thread nlistener=new ClientListenerFromNServer(in_lookup,map);
                 nlistener.start();
+                packetToServer = new NPacket();
+                out_lookup.writeObject(packetToServer);
 
+                
+
+               
         	} else {
         		System.err.println("ERROR: Invalid arguments!");
         		System.exit(-1);
