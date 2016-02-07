@@ -15,18 +15,30 @@ public class Client {
                 socket_lookup=new Socket(args[0],Integer.parseInt(args[1]));
                 out_lookup = new ObjectOutputStream(socket_lookup.getOutputStream());
                 in_lookup = new ObjectInputStream(socket_lookup.getInputStream());
-                while(true){
-                    NPacket packetToServer = new NPacket();
-                    packetToServer.location=new  Location(InetAddress.getLocalHost().getHostAddress(),Integer.parseInt(args[2]));
-                    packetToServer.symbol =args[3];
-                    out_lookup.writeObject(packetToServer);
+               
+                NPacket packetToServer = new NPacket();
+                packetToServer.type=NPacket.NSERVER_REGISTER;
+                packetToServer.location=new  Location(InetAddress.getLocalHost().getHostAddress(),Integer.parseInt(args[2]));
+                packetToServer.symbol =args[3];
+                out_lookup.writeObject(packetToServer);
 
-                        /* print server reply */
-                    NPacket packetFromServer;
-                    packetFromServer = (NPacket) in_lookup.readObject();
-                    System.out.println(packetFromServer.symbol);
-                    break;
-               }
+                    /* print server reply */
+                NPacket packetFromServer;
+                packetFromServer = (NPacket) in_lookup.readObject();
+                System.out.println(packetFromServer.symbol);
+                if(packetFromServer.symbol.indexOf("used")!=-1)
+                    System.exit(-1);
+                //the name is already used, choose another one
+
+                packetToServer = new NPacket();
+                packetToServer.type=NPacket.NSERVER_LOOKUP;
+                packetToServer.location=new  Location(InetAddress.getLocalHost().getHostAddress(),Integer.parseInt(args[2]));
+                packetToServer.symbol =args[3];
+                out_lookup.writeObject(packetToServer);
+
+                ConcurrentHashMap<String,Location> map=new ConcurrentHashMap<String,Location>();  
+                Thread nlistener=new ClientListenerFromNServer(socket_lookup,map);
+                nlistener.start();
 
         	} else {
         		System.err.println("ERROR: Invalid arguments!");
@@ -36,11 +48,14 @@ public class Client {
             System.err.println("ERROR: Could not listen on port!");
             System.exit(-1);
         }
-
+        /************************************************************
+        each client is a server to all the other clients, and it's a 
+        client to all the other clients and naming service as well as the
+        naming server
+        *************************************************************/
         //System.out.println("now operates as a server");
        /* serverSocket = new ServerSocket(Integer.parseInt(args[2]));
 
-        ConcurrentHashMap<String,Integer> map=new ConcurrentHashMap<String,Integer>(); 
         try{
             Scanner scr=new Scanner(new File(args[3]));
             while(scr.hasNext()){
