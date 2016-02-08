@@ -22,10 +22,12 @@ public class NServer{
             System.err.println("ERROR: Could not listen on port!");
             System.exit(-1);
         }
-         while (listening) {
+         // one thread only
+        while (listening) {
             Socket socket=serverSocket.accept();
-            new Thread(new NServerHandler(socket,map,out_map)).start();
-          
+            Thread r=new Thread(new NServerHandler(socket,map,out_map));
+            r.start();
+           // r.join();
         }
 	}
 }

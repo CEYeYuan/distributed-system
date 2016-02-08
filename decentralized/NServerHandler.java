@@ -62,7 +62,7 @@ public class NServerHandler implements Runnable{
 				toClient.writeObject(packetToClient);
 			}
 			
-			System.out.println("broadcasting :"+myself.symbol+" "+myself.location.toString()+ " to all users");
+			System.out.println("broadcasting :"+myself.symbol+" "+myself.location.toString()+ " to "+out_map.size()+" users");
 			//signal all the other user 
             for(String s:out_map.keySet()){
                 ObjectOutputStream out=out_map.get(s);
