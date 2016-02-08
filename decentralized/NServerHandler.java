@@ -30,6 +30,7 @@ public class NServerHandler implements Runnable{
 			packetFromClient = (NPacket) fromClient.readObject();
 			/* create a packet to send reply back to client */
 			NPacket packetToClient = new NPacket();
+			NPacket myself=new NPacket();
 		
 			if(map.get(packetFromClient.symbol)==null){
 				map.put(packetFromClient.symbol,packetFromClient.location);
@@ -39,6 +40,8 @@ public class NServerHandler implements Runnable{
 				packetToClient.symbol=packetFromClient.symbol+ " "+map.get(packetFromClient.symbol).toString()+" registered ";
 				System.out.println(packetFromClient.symbol+ map.get(packetFromClient.symbol).toString());
 				toClient.writeObject(packetToClient);
+				myself.symbol=packetFromClient.symbol;
+				myself.location=packetFromClient.location;
 			}
 			else{
 				packetToClient.symbol=packetFromClient.symbol+ " already used";
@@ -51,20 +54,18 @@ public class NServerHandler implements Runnable{
 			packetFromClient = (NPacket) fromClient.readObject();
 			
 			//sycn the global hashmap
+			System.out.println("syncing "+myself.symbol+"'s local hashmap");
 			for(String s:map.keySet()){
 				packetToClient = new NPacket();
 				packetToClient.symbol=s;
 				packetToClient.location=map.get(s);
 				toClient.writeObject(packetToClient);
-				System.out.println("sending "+packetToClient.symbol+packetToClient.location.toString());
 			}
 			
+			System.out.println("broadcasting :"+myself.symbol+" "+myself.location.toString()+ " to all users");
 			//signal all the other user 
             for(String s:out_map.keySet()){
                 ObjectOutputStream out=out_map.get(s);
-                packetToClient = new NPacket();
-                packetToClient.symbol=packetFromClient.symbol;
-                packetToClient.location=packetFromClient.location;
                 out.writeObject(packetToClient);
             }
 				

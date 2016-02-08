@@ -24,7 +24,6 @@ public class NServer{
         }
          while (listening) {
             Socket socket=serverSocket.accept();
-            ObjectOutputStream out=new ObjectOutputStream(socket.getOutputStream());
             new Thread(new NServerHandler(socket,map,out_map)).start();
           
         }

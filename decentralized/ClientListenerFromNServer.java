@@ -19,9 +19,11 @@ public class ClientListenerFromNServer extends Thread{
                 if(packetFromServer.symbol==null||packetFromServer.location==null){
                 	continue;
                 }
-                map.put(packetFromServer.symbol,packetFromServer.location);
-                System.out.println("local hashmap insertion: "+packetFromServer.symbol+" :"+packetFromServer.location.toString());
-				
+                if(map.get(packetFromServer.symbol)==null){
+                	map.put(packetFromServer.symbol,packetFromServer.location);
+                	System.out.println("local hashmap insertion: "+packetFromServer.symbol+" :"+packetFromServer.location.toString());
+                }
+                
 			}
 		}
 		catch(Exception e){
