@@ -7,6 +7,9 @@ public class NServer{
 	public static void main(String[] args) throws Exception{
 		ServerSocket serverSocket = null;
 		ConcurrentHashMap<String,Location> map=new ConcurrentHashMap<String,Location>();
+        ConcurrentHashMap<String,ObjectOutputStream> out_map=new ConcurrentHashMap<String,ObjectOutputStream >();
+       
+
 		boolean listening=true;
         try {
         	if(args.length == 1) {
@@ -20,7 +23,9 @@ public class NServer{
             System.exit(-1);
         }
          while (listening) {
-            new Thread(new NServerHandler(serverSocket.accept(),map)).start();
+            Socket socket=serverSocket.accept();
+            ObjectOutputStream out=new ObjectOutputStream(socket.getOutputStream());
+            new Thread(new NServerHandler(socket,map,out_map)).start();
           
         }
 	}

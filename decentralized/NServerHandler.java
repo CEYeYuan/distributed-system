@@ -7,10 +7,11 @@ import java.util.ArrayList;
 public class NServerHandler implements Runnable{
 	private Socket socket = null;
 	private ConcurrentHashMap<String,Location> map=null;
-
-	public NServerHandler(Socket socket,ConcurrentHashMap<String,Location> map) {
+	private ConcurrentHashMap<String,ObjectOutputStream> out_map=null;
+	public NServerHandler(Socket socket,ConcurrentHashMap<String,Location> map,ConcurrentHashMap<String,ObjectOutputStream> out_map) {
 		this.map=map;
 		this.socket = socket;
+		this.out_map=out_map;
 		System.out.println("Created new Thread to handle new player");
 	}
 
@@ -32,6 +33,7 @@ public class NServerHandler implements Runnable{
 		
 			if(map.get(packetFromClient.symbol)==null){
 				map.put(packetFromClient.symbol,packetFromClient.location);
+			    out_map.put(packetFromClient.symbol,toClient);
 
 				/* send reply back to client */
 				packetToClient.symbol=packetFromClient.symbol+ " "+map.get(packetFromClient.symbol).toString()+" registered ";
@@ -48,16 +50,23 @@ public class NServerHandler implements Runnable{
 
 			packetFromClient = (NPacket) fromClient.readObject();
 			
+			//sycn the global hashmap
 			for(String s:map.keySet()){
 				packetToClient = new NPacket();
 				packetToClient.symbol=s;
 				packetToClient.location=map.get(s);
-				if(packetToClient.location==null)
-					System.out.println("null location sending");
 				toClient.writeObject(packetToClient);
 				System.out.println("sending "+packetToClient.symbol+packetToClient.location.toString());
 			}
-		
+			
+			//signal all the other user 
+            for(String s:out_map.keySet()){
+                ObjectOutputStream out=out_map.get(s);
+                packetToClient = new NPacket();
+                packetToClient.symbol=packetFromClient.symbol;
+                packetToClient.location=packetFromClient.location;
+                out.writeObject(packetToClient);
+            }
 				
 			// while(true){
 			// 	;
