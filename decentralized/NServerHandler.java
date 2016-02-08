@@ -34,7 +34,7 @@ public class NServerHandler implements Runnable{
 				map.put(packetFromClient.symbol,packetFromClient.location);
 
 				/* send reply back to client */
-				packetToClient.symbol=packetFromClient.symbol+ " registered";
+				packetToClient.symbol=packetFromClient.symbol+ " "+map.get(packetFromClient.symbol).toString()+" registered ";
 				System.out.println(packetFromClient.symbol+ map.get(packetFromClient.symbol).toString());
 				toClient.writeObject(packetToClient);
 			}
@@ -49,16 +49,19 @@ public class NServerHandler implements Runnable{
 			packetFromClient = (NPacket) fromClient.readObject();
 			
 			for(String s:map.keySet()){
+				packetToClient = new NPacket();
 				packetToClient.symbol=s;
 				packetToClient.location=map.get(s);
-				System.out.println("sending "+s+map.get(s).toString());
+				if(packetToClient.location==null)
+					System.out.println("null location sending");
 				toClient.writeObject(packetToClient);
+				System.out.println("sending "+packetToClient.symbol+packetToClient.location.toString());
 			}
 		
 				
-			while(true){
-				;
-			}
+			// while(true){
+			// 	;
+			// }
 			
 
 			/*

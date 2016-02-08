@@ -1,17 +1,17 @@
 import java.io.Serializable;
 public class Location implements Serializable {
-	public String  broker_host;
-	public Integer broker_port;
+	public String  host;
+	public Integer port;
 	
 	/* constructor */
 	public Location(String host, Integer port) {
-		this.broker_host = host;
-		this.broker_port = port;
+		this.host = host;
+		this.port = port;
 	}
 	
 	/* printable output */
 	public String toString() {
-		return " HOST: " + broker_host + " PORT: " + broker_port; 
+		return " HOST: " + host + " PORT: " + port; 
 	}
 	
 }

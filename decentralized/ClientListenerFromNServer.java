@@ -16,12 +16,11 @@ public class ClientListenerFromNServer extends Thread{
 			while(true){
 				NPacket packetFromServer;
                 packetFromServer = (NPacket) in.readObject();
-                if(packetFromServer.symbol.indexOf("registered")!=-1)
+                if(packetFromServer.symbol==null||packetFromServer.location==null){
                 	continue;
-
+                }
                 map.put(packetFromServer.symbol,packetFromServer.location);
-                System.out.println("added new client "+packetFromServer.symbol);
-            	System.out.println(packetFromServer.location.toString());
+                System.out.println("local hashmap insertion: "+packetFromServer.symbol+" :"+packetFromServer.location.toString());
 				
 			}
 		}
