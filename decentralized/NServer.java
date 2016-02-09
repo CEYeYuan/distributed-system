@@ -27,6 +27,7 @@ public class NServer{
             Socket socket=serverSocket.accept();
             Thread r=new Thread(new NServerHandler(socket,map,out_map));
             r.start();
+            Thread.sleep(2000);
            // r.join();
         }
 	}
