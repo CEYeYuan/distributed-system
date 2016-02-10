@@ -15,60 +15,62 @@ public class NServerHandler implements Runnable{
 		System.out.println("Created new Thread to handle new player");
 	}
 
-	public void run() {
+	public void  run() {
 
 		boolean gotByePacket = false;
 		try {
 
-			/* stream to read from client */
-			ObjectInputStream fromClient = new ObjectInputStream(socket.getInputStream());
-			NPacket packetFromClient;
-			
-			/* stream to write back to client */
-			ObjectOutputStream toClient = new ObjectOutputStream(socket.getOutputStream());				
-
-			packetFromClient = (NPacket) fromClient.readObject();
-			/* create a packet to send reply back to client */
-			NPacket packetToClient = new NPacket();
-			NPacket myself=new NPacket();
-		
-			if(map.get(packetFromClient.symbol)==null){
-				map.put(packetFromClient.symbol,packetFromClient.location);
-			    out_map.put(packetFromClient.symbol,toClient);
-
-				/* send reply back to client */
-				packetToClient.symbol=packetFromClient.symbol+ " "+map.get(packetFromClient.symbol).toString()+" registered ";
-				System.out.println(packetFromClient.symbol+ map.get(packetFromClient.symbol).toString());
-				toClient.writeObject(packetToClient);
-				myself.symbol=packetFromClient.symbol;
-				myself.location=packetFromClient.location;
-			}
-			else{
-				packetToClient.symbol=packetFromClient.symbol+ " already used";
-				System.out.println(packetFromClient.symbol+ " already used");
-				toClient.writeObject(packetToClient);
-				return;//exit current thread
-			}
-			
-
-			packetFromClient = (NPacket) fromClient.readObject();
-			
-			//sycn the global hashmap
-			System.out.println("syncing "+myself.symbol+"'s local hashmap");
-			for(String s:map.keySet()){
-				packetToClient = new NPacket();
-				packetToClient.symbol=s;
-				packetToClient.location=map.get(s);
-				toClient.writeObject(packetToClient);
-			}
-			
-			System.out.println("broadcasting :"+myself.symbol+" "+myself.location.toString()+ " to "+out_map.size()+" users");
-			//signal all the other user 
-            for(String s:out_map.keySet()){
-                ObjectOutputStream out=out_map.get(s);
-                out.writeObject(packetToClient);
-            }
+				/* stream to read from client */
+				ObjectInputStream fromClient = new ObjectInputStream(socket.getInputStream());
+				NPacket packetFromClient;
 				
+				/* stream to write back to client */
+				ObjectOutputStream toClient = new ObjectOutputStream(socket.getOutputStream());				
+
+				packetFromClient = (NPacket) fromClient.readObject();
+				/* create a packet to send reply back to client */
+				NPacket packetToClient = new NPacket();
+				NPacket myself=new NPacket();
+			
+				if(map.get(packetFromClient.symbol)==null){
+					map.put(packetFromClient.symbol,packetFromClient.location);
+				    out_map.put(packetFromClient.symbol,toClient);
+
+					/* send reply back to client */
+					packetToClient.symbol=packetFromClient.symbol+ " "+map.get(packetFromClient.symbol).toString()+" registered ";
+					System.out.println(packetFromClient.symbol+ map.get(packetFromClient.symbol).toString());
+					toClient.writeObject(packetToClient);
+					myself.symbol=packetFromClient.symbol;
+					myself.location=packetFromClient.location;
+				}
+				else{
+					packetToClient.symbol=packetFromClient.symbol+ " already used";
+					System.out.println(packetFromClient.symbol+ " already used");
+					toClient.writeObject(packetToClient);
+					return;//exit current thread
+				}
+				
+
+				packetFromClient = (NPacket) fromClient.readObject();
+				
+				//sycn the global hashmap
+				System.out.println("syncing "+myself.symbol+"'s local hashmap");
+				for(String s:map.keySet()){
+					packetToClient = new NPacket();
+					packetToClient.symbol=s;
+					packetToClient.location=map.get(s);
+					toClient.writeObject(packetToClient);
+				}
+				
+				/*System.out.println("broadcasting :"+myself.symbol+" "+myself.location.toString()+ " to "+out_map.size()+" users");
+				//signal all the other user 
+	            for(String s:out_map.keySet()){
+	                ObjectOutputStream out=out_map.get(s);
+	                out.writeObject(packetToClient);
+	            }*/
+				
+			
+
 			// while(true){
 			// 	;
 			// }

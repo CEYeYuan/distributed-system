@@ -15,9 +15,11 @@ public class Client {
                 socket_lookup=new Socket(args[0],Integer.parseInt(args[1]));
                 out_lookup = new ObjectOutputStream(socket_lookup.getOutputStream());
                 in_lookup = new ObjectInputStream(socket_lookup.getInputStream());
+                serverSocket = new ServerSocket(Integer.parseInt(args[2]));//servers as server
                
                 NPacket packetToServer = new NPacket();
-                packetToServer.location=new  Location(InetAddress.getLocalHost().getHostAddress(),Integer.parseInt(args[2]));
+                Location mylocation=new  Location(InetAddress.getLocalHost().getHostAddress(),Integer.parseInt(args[2]));
+                packetToServer.location=mylocation;
                 packetToServer.symbol =args[3];
                 out_lookup.writeObject(packetToServer);
 
@@ -29,11 +31,18 @@ public class Client {
                     return;
                 //the name is already used, choose another one
 
-                ConcurrentHashMap<String,Location> map=new ConcurrentHashMap<String,Location>();  
-                Thread nlistener=new ClientListenerFromNServer(in_lookup,map);
-                nlistener.start();
+                //ConcurrentHashMap<String,Location> map=new ConcurrentHashMap<String,Location>();  
+                ConcurrentHashMap<String,Location> out_map=new ConcurrentHashMap<String,ObjectOutputStream>();  
+                Thread nlistener=new ClientListenerFromNServer(in_lookup,out_map,args[3],mylocation);
+                nlistener.start();//listen from naming service
+                new Thread(new PeerSender(socket,out_map)).start();
                 packetToServer = new NPacket();
                 out_lookup.writeObject(packetToServer);
+
+                while(true){
+                    Socket socket=serverSocket.accept();
+                    new Thread(new PeerListener(socket,out_map)).start();
+                }
 
                 
 

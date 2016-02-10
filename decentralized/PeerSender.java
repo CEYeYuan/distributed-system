@@ -2,20 +2,19 @@ import java.net.*;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
-public class ClientListenerFromNServer extends Thread{
-	ObjectInputStream in;
+public class PeerSender extends Thread{
+
 	ConcurrentHashMap<String,ObjectOutputStream> map;  
-	String my_name;
-	Location my_location;
-	public ClientListenerFromNServer(ObjectInputStream in,ConcurrentHashMap<String,ObjectOutputStream> map,String my_name,Location my_location){
-		this.in=in;
+	public ClientSender(ConcurrentHashMap<String,ObjectOutputStream> map){
 		this.map=map;
-		this.my_name=my_name;
-		this.my_location=my_location;
 	}
 
 	public void run(){
-		ObjectInputStream in_lookup=null;
+		
+		/*
+		read from keyboard, broadcast to all users(check if has token first)
+		*/
+		/*ObjectInputStream in_lookup=null;
 		try{
 			while(true){
 				NPacket packetFromServer;
@@ -25,15 +24,14 @@ public class ClientListenerFromNServer extends Thread{
                 }
                 if(map.get(packetFromServer.symbol)==null){
                 	map.put(packetFromServer.symbol,packetFromServer.location);
-                	Socket socket=new Socket(packetFromServer.location.host,packetFromServer.location.port);
-                	new Thread(new PeerListener(socket,out_map)).start();
+                	System.out.println("local hashmap insertion: "+packetFromServer.symbol+" :"+packetFromServer.location.toString());
                 }
                 
 			}
 		}
 		catch(Exception e){
 			e.printStackTrace();
-		}
+		}*/
 		
 	}
 }
