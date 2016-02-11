@@ -30,12 +30,11 @@ public class Client {
                 if(packetFromServer.symbol.indexOf("used")!=-1)
                     return;
                 //the name is already used, choose another one
-
-                //ConcurrentHashMap<String,Location> map=new ConcurrentHashMap<String,Location>();  
-                ConcurrentHashMap<String,Location> out_map=new ConcurrentHashMap<String,ObjectOutputStream>();  
-                Thread nlistener=new ClientListenerFromNServer(in_lookup,out_map,args[3],mylocation);
+ 
+                ConcurrentHashMap<String,ObjectOutputStream> out_map=new ConcurrentHashMap<String,ObjectOutputStream>();  
+                Thread nlistener=new ClientListenerFromNServer(in_lookup,out_map);
                 nlistener.start();//listen from naming service
-                new Thread(new PeerSender(socket,out_map)).start();
+                new Thread(new PeerSender(out_map)).start();
                 packetToServer = new NPacket();
                 out_lookup.writeObject(packetToServer);
 

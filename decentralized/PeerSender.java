@@ -5,7 +5,7 @@ import java.util.concurrent.*;
 public class PeerSender extends Thread{
 
 	ConcurrentHashMap<String,ObjectOutputStream> map;  
-	public ClientSender(ConcurrentHashMap<String,ObjectOutputStream> map){
+	public PeerSender(ConcurrentHashMap<String,ObjectOutputStream> map){
 		this.map=map;
 	}
 

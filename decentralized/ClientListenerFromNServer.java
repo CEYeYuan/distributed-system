@@ -5,13 +5,10 @@ import java.util.concurrent.*;
 public class ClientListenerFromNServer extends Thread{
 	ObjectInputStream in;
 	ConcurrentHashMap<String,ObjectOutputStream> map;  
-	String my_name;
-	Location my_location;
-	public ClientListenerFromNServer(ObjectInputStream in,ConcurrentHashMap<String,ObjectOutputStream> map,String my_name,Location my_location){
+
+	public ClientListenerFromNServer(ObjectInputStream in,ConcurrentHashMap<String,ObjectOutputStream> map){
 		this.in=in;
 		this.map=map;
-		this.my_name=my_name;
-		this.my_location=my_location;
 	}
 
 	public void run(){
@@ -24,9 +21,8 @@ public class ClientListenerFromNServer extends Thread{
                 	continue;
                 }
                 if(map.get(packetFromServer.symbol)==null){
-                	map.put(packetFromServer.symbol,packetFromServer.location);
                 	Socket socket=new Socket(packetFromServer.location.host,packetFromServer.location.port);
-                	new Thread(new PeerListener(socket,out_map)).start();
+                	new Thread(new PeerListener(socket,map,packetFromServer.symbol,packetFromServer.location)).start();
                 }
                 
 			}
