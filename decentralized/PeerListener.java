@@ -7,44 +7,59 @@ public class PeerListener extends Thread{
 	ConcurrentHashMap<String,ObjectOutputStream> map;  
 	Location peer_location;
 	String peer_name;
-	public PeerListener(Socket socket,ConcurrentHashMap<String,ObjectOutputStream> map){
+	private String myself;
+	private Location mylocation;
+	
+	public PeerListener(Socket socket,ConcurrentHashMap<String,ObjectOutputStream> map,String myself,Location mylocation){
 		//server as sever
 		this.socket=socket;
 		this.map=map;
+		this.myself=myself;
+		this.mylocation=mylocation;
 	}
 
 
-	public PeerListener(Socket socket,ConcurrentHashMap<String,ObjectOutputStream> map,String peer_name,Location peer_location){
+	public PeerListener(ConcurrentHashMap<String,ObjectOutputStream> map,String peer_name,Location peer_location,String myself,Location mylocation){
 		//learn from name service
-		this.socket=socket;
+		try{
+			socket=new Socket(peer_location.host,peer_location.port);
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
 		this.map=map;
 		this.peer_name=peer_name;
 		this.peer_location=peer_location;
+		this.myself=myself;
+		this.mylocation=mylocation;
 	}
 	public void run(){
 		try{
-			ObjectInputStream in= new ObjectInputStream(socket.getInputStream());
+
+			assert(socket!=null);
+
 			ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
 			if(peer_name!=null&&peer_location!=null){
-				//learn directly from naming service
+				//learn directly from naming service, introduce my self
 				map.put(peer_name,out);
-	            System.out.println("connection to "+peer_name+peer_location.toString()+" added");
-			}
-
-			for(String s:map.keySet()){
-				// tell all the previous joined user about my self
-				ObjectOutputStream tmp=map.get(s);
 				NPacket packetToPeer = new NPacket();  
-		        packetToPeer.location=peer_location;
-		        packetToPeer.sender =peer_name;
+		        packetToPeer.location=mylocation;
+		        packetToPeer.sender =myself;
 		        packetToPeer.type=NPacket.PACKET_INTRO;
 		        out.writeObject(packetToPeer);
+		        out.flush();
+		      	System.out.println("connection to "+peer_name+peer_location.toString()+" added");	           
 			}
+
+			ObjectInputStream in= new ObjectInputStream(socket.getInputStream());
+		
+	
 						
 			while(true){
 				NPacket packetFromPeer;
                 packetFromPeer = (NPacket) in.readObject();
                 if(packetFromPeer.type==NPacket.PACKET_INTRO){
+                	//learn by other client's broadcast
                 	if(map.get(packetFromPeer.sender)==null){
                 		map.put(packetFromPeer.sender,out);
                 		System.out.println("connection to "+packetFromPeer.sender+packetFromPeer.location.toString()+" added");

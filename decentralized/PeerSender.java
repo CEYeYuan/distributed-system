@@ -12,26 +12,27 @@ public class PeerSender extends Thread{
 	public void run(){
 		
 		/*
-		read from keyboard, broadcast to all users(check if has token first)
+		read from keyboard, broadcast to all users(check if has token first),pass the token
 		*/
-		/*ObjectInputStream in_lookup=null;
+			
+	}
+
+	private void broadcast(NPacket packet){
 		try{
-			while(true){
-				NPacket packetFromServer;
-                packetFromServer = (NPacket) in.readObject();
-                if(packetFromServer.symbol==null||packetFromServer.location==null){
-                	continue;
-                }
-                if(map.get(packetFromServer.symbol)==null){
-                	map.put(packetFromServer.symbol,packetFromServer.location);
-                	System.out.println("local hashmap insertion: "+packetFromServer.symbol+" :"+packetFromServer.location.toString());
-                }
-                
+			for (String s:map.keySet()){
+			ObjectOutputStream tmp=map.get(s);
+			assert(tmp!=null);
+			tmp.writeObject(packet);
 			}
-		}
-		catch(Exception e){
+		}catch(Exception e){
 			e.printStackTrace();
-		}*/
+		}
 		
+	}
+
+
+	private ObjectOutputStream findNext(){
+		//find the next user for the token ring
+		return null;
 	}
 }

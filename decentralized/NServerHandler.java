@@ -51,9 +51,9 @@ public class NServerHandler implements Runnable{
 				}
 				
 
-				packetFromClient = (NPacket) fromClient.readObject();
+		
 				
-				//sycn the global hashmap
+				//sync the global hashmap
 				System.out.println("syncing "+myself.symbol+"'s local hashmap");
 				for(String s:map.keySet()){
 					packetToClient = new NPacket();
@@ -61,19 +61,9 @@ public class NServerHandler implements Runnable{
 					packetToClient.location=map.get(s);
 					toClient.writeObject(packetToClient);
 				}
-				
-				/*System.out.println("broadcasting :"+myself.symbol+" "+myself.location.toString()+ " to "+out_map.size()+" users");
-				//signal all the other user 
-	            for(String s:out_map.keySet()){
-	                ObjectOutputStream out=out_map.get(s);
-	                out.writeObject(packetToClient);
-	            }*/
-				
-			
-
-			// while(true){
-			// 	;
-			// }
+				packetToClient = new NPacket();
+				packetToClient.type=NPacket.PACKET_NS_DONE;	
+				toClient.writeObject(packetToClient);
 			
 
 			/*

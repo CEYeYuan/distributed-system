@@ -30,18 +30,30 @@ public class Client {
                 if(packetFromServer.symbol.indexOf("used")!=-1)
                     return;
                 //the name is already used, choose another one
- 
                 ConcurrentHashMap<String,ObjectOutputStream> out_map=new ConcurrentHashMap<String,ObjectOutputStream>();  
-                Thread nlistener=new ClientListenerFromNServer(in_lookup,out_map);
-                nlistener.start();//listen from naming service
-                new Thread(new PeerSender(out_map)).start();
-                packetToServer = new NPacket();
-                out_lookup.writeObject(packetToServer);
-
-                while(true){
-                    Socket socket=serverSocket.accept();
-                    new Thread(new PeerListener(socket,out_map)).start();
+                new Thread(new PeerListenerDispatcher(serverSocket,out_map,args[3],mylocation)).start();//listen to the connection from other peers
+               /***************************************
+               syncing hashmap from server
+                ***************************************/
+               int count=0;
+               while(true){
+                    packetFromServer = (NPacket) in_lookup.readObject();
+                    if(packetFromServer.type==NPacket.PACKET_NS_DONE){
+                        System.out.println("syncing done: Know "+count+" peers");
+                        break;
+                    }    
+                    //if(packetFromServer.symbol.equals(args[3]))//myself
+                      //  continue;
+                    if(out_map.get(packetFromServer.symbol)==null){
+                        //System.out.println("trying to connect "+packetFromServer.symbol+" "+packetFromServer.location.toString());
+                        new Thread(new PeerListener(out_map,packetFromServer.symbol,packetFromServer.location,args[3],mylocation)) .start();
+                        count++;
+                    }
+                
                 }
+
+
+
 
                 
 
@@ -59,24 +71,6 @@ public class Client {
         client to all the other clients and naming service as well as the
         naming server
         *************************************************************/
-        //System.out.println("now operates as a server");
-       /* serverSocket = new ServerSocket(Integer.parseInt(args[2]));
-
-        try{
-            Scanner scr=new Scanner(new File(args[3]));
-            while(scr.hasNext()){
-                map.put(scr.next().toLowerCase(),scr.nextInt());
-            }
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-        
-        while (listening) {
-            new Thread(new BrokerServerHandlerThread(serverSocket.accept(),map,args[3],out_lookup,in_lookup,socket_lookup)).start();
-          
-        }
-
-        serverSocket.close();
-        */
+      
     }
 }
