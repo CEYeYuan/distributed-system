@@ -31,6 +31,7 @@ public class Client {
                     return;
                 //the name is already used, choose another one
                 ConcurrentHashMap<String,ObjectOutputStream> out_map=new ConcurrentHashMap<String,ObjectOutputStream>();  
+                new Thread(new PeerSender(out_map,args[3])).start();
                 new Thread(new PeerListenerDispatcher(serverSocket,out_map,args[3],mylocation)).start();//listen to the connection from other peers
                /***************************************
                syncing hashmap from server

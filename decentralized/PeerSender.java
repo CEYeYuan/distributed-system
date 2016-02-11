@@ -5,15 +5,23 @@ import java.util.concurrent.*;
 public class PeerSender extends Thread{
 
 	ConcurrentHashMap<String,ObjectOutputStream> map;  
-	public PeerSender(ConcurrentHashMap<String,ObjectOutputStream> map){
+	String myself;
+	public PeerSender(ConcurrentHashMap<String,ObjectOutputStream> map,String myself){
 		this.map=map;
+		this.myself=myself;
 	}
 
 	public void run(){
-		
-		/*
-		read from keyboard, broadcast to all users(check if has token first),pass the token
-		*/
+		while(true){
+			/*
+			if hold the token, call broadcast
+			pass token to next person
+
+
+			else
+				queue all the keypress
+			*/
+		}
 			
 	}
 
@@ -33,6 +41,22 @@ public class PeerSender extends Thread{
 
 	private ObjectOutputStream findNext(){
 		//find the next user for the token ring
-		return null;
+		int size=map.size();
+		String arr[]=new String[size];
+		int i=0;
+		for (String s:map.keySet()){
+			arr[i]=s;
+			i++;
+		}
+		Arrays.sort(arr);
+		for(i=0;i<size;i++){
+			if(arr[i].equals(myself))
+				break;
+		}
+		if(i+1<size)
+			return map.get(arr[i+1]);
+		else
+			return map.get(arr[0]);
+		
 	}
 }
