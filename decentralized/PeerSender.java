@@ -6,6 +6,10 @@ public class PeerSender extends Thread{
 
 	ConcurrentHashMap<String,ObjectOutputStream> map;  
 	String myself;
+	boolean added=false;
+	String arr[]=new String[size];
+
+
 	public PeerSender(ConcurrentHashMap<String,ObjectOutputStream> map,String myself){
 		this.map=map;
 		this.myself=myself;
@@ -41,14 +45,17 @@ public class PeerSender extends Thread{
 
 	private ObjectOutputStream findNext(){
 		//find the next user for the token ring
-		int size=map.size();
-		String arr[]=new String[size];
-		int i=0;
-		for (String s:map.keySet()){
-			arr[i]=s;
-			i++;
+		if(added==false){
+			int size=map.size();	
+			int i=0;
+			for (String s:map.keySet()){
+				arr[i]=s;
+				i++;
+			}
+			Arrays.sort(arr);
+			added=true;
 		}
-		Arrays.sort(arr);
+	
 		for(i=0;i<size;i++){
 			if(arr[i].equals(myself))
 				break;
