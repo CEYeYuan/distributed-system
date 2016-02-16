@@ -74,7 +74,14 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                 randomGen = new Random(seed);
                 
                 // Build the maze starting at the corner
+<<<<<<< HEAD
                 buildMaze(new Point(0,0));
+=======
+                if(seed == 0)
+                    buildEmptyMaze();
+                else
+                    buildMaze(new Point(0,0));
+>>>>>>> latest
 
                 thread.start();
         }
@@ -128,7 +135,11 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                                         }
                                 }
                                 
+<<<<<<< HEAD
                         }       
+=======
+                        }	    
+>>>>>>> latest
                         System.out.print("\n");
                         for(int j = 0; j < maxX; j++) {
                                 CellImpl cell = getCellImpl(new Point(j,i));
@@ -169,7 +180,11 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                                                 } else {
                                                         System.out.print("+ ");
                                                 }
+<<<<<<< HEAD
                                         }       
+=======
+                                        }		
+>>>>>>> latest
                                 }
                                 System.out.print("\n");     
                         }   
@@ -206,6 +221,39 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                 addClient(client, point);
         }
         
+<<<<<<< HEAD
+=======
+        public synchronized void addClientAt(Client client, Point point,
+                                             int direction){
+                //Adapted from addClient(Client client)
+                //addClient(client, point);
+                assert(client != null);
+                Direction d = null;
+                if(direction == Player.North){
+                        d = Direction.North;
+                }else if(direction == Player.South){
+                        d = Direction.South;
+                }else if(direction == Player.East){
+                        d = Direction.East;
+                }else{
+                        d = Direction.West;
+                }
+                
+                DirectedPoint dPoint = new DirectedPoint(point, d);
+                assert(checkBounds(point));
+                
+                CellImpl cell = getCellImpl(point);
+                cell.setContents(client);
+                clientMap.put(client, dPoint);
+                client.registerMaze(this);
+                client.addClientListener(this);
+                update();
+                notifyClientAdd(client);
+                
+                
+        }
+        
+>>>>>>> latest
         public synchronized Point getClientPoint(Client client) {
                 assert(client != null);
                 Object o = clientMap.get(client);
@@ -424,9 +472,15 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                 assert(client != null);
                 assert(checkBounds(point));
                 CellImpl cell = getCellImpl(point);
+<<<<<<< HEAD
                 Direction d = Direction.random();
                 while(cell.isWall(d)) {
                   d = Direction.random();
+=======
+                Direction d = Direction.random(randomGen);
+                while(cell.isWall(d)) {
+                  d = Direction.random(randomGen);
+>>>>>>> latest
                 }
                 cell.setContents(client);
                 clientMap.put(client, new DirectedPoint(point, d));
@@ -459,9 +513,22 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                         point = new Point(randomGen.nextInt(maxX),randomGen.nextInt(maxY));
                         cell = getCellImpl(point);
                 }
+<<<<<<< HEAD
                 Direction d = Direction.random();
                 while(cell.isWall(d)) {
                         d = Direction.random();
+=======
+
+                /***********************************************************		
+ -                Every time, we 're creating a new Direction object, and what's 		
+ -                worse is that we init a new randome generator that we didn't control		
+ -                the seed ! So it's better to pass in a global random generator.		
+ -                ************************************************************/
+ 
+                Direction d = Direction.random(randomGen);
+                while(cell.isWall(d)) {
+                        d = Direction.random(randomGen);
+>>>>>>> latest
                 }
                 cell.setContents(target);
                 clientMap.put(target, new DirectedPoint(point, d));
@@ -532,7 +599,11 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                 clientMap.put(client, newPoint);
                 newCell.setContents(client);
                 /* Clear the old cell */
+<<<<<<< HEAD
                 oldCell.setContents(null);  
+=======
+                oldCell.setContents(null);	
+>>>>>>> latest
                 
                 update();
                 return true; 
@@ -804,7 +875,11 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                         Direction.South };
                         
                         // Create a vector of the possible choices
+<<<<<<< HEAD
                         Vector options = new Vector();         
+=======
+                        Vector options = new Vector();	       
+>>>>>>> latest
                         
                         // Iterate through the directions and see which
                         // Cells have been visited, adding those that haven't
@@ -840,13 +915,60 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                 CellImpl cell = getCellImpl(point);
                 cell.setVisited();
                 Direction d = pickNeighbor(point);
+<<<<<<< HEAD
                 while(d != null) {      
+=======
+                while(d != null) {	    
+>>>>>>> latest
                         removeWall(point, d);
                         Point newPoint = point.move(d);
                         buildMaze(newPoint);
                         d = pickNeighbor(point);
                 }
         }
+<<<<<<< HEAD
+=======
+        
+        /**
+         * Build a {@link Maze} with only
+         * the external boundaries.
+         */
+        private void buildEmptyMaze() {
+                //Start from the SW (0,0) corner
+                //iterate until NE(maxX, maxY) and remove all walls
+                //Remove all the interior walls
+                for(int x=1; x < maxX-1; x++){
+                    for(int y=1; y< maxY-1; y++){
+                        Point p = new Point(x,y);
+                        removeWall(p, Direction.North);
+                        removeWall(p, Direction.East);
+                        removeWall(p, Direction.South);
+                        removeWall(p, Direction.West);
+                    }
+                }
+                //Remove all the exterior walls
+                for(int x=1; x<maxX-1; x++){
+                    Point p = new Point(x,0);
+                    removeWall(p, Direction.East);
+                    removeWall(p, Direction.West);
+                    
+                    p = new Point(x, maxY-1);
+                    removeWall(p, Direction.East);
+                    removeWall(p, Direction.West);
+                }
+
+                for(int y=1; y<maxY-1; y++){
+                    Point p = new Point(0,y);
+                    removeWall(p, Direction.North);
+                    removeWall(p, Direction.South);
+                    
+                    p = new Point(maxX-1, y);
+                    removeWall(p, Direction.North);
+                    removeWall(p, Direction.South);
+                }
+                    
+        }
+>>>>>>> latest
        
         /** 
          * Obtain the {@link CellImpl} at the specified point. 
@@ -862,4 +984,8 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                 assert(o2 instanceof CellImpl);
                 return (CellImpl)o2;
         }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> latest
