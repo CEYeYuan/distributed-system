@@ -8,7 +8,7 @@ public class NServer{
 		ServerSocket serverSocket = null;
 		ConcurrentHashMap<String,Location> map=new ConcurrentHashMap<String,Location>();
         ConcurrentHashMap<String,ObjectOutputStream> out_map=new ConcurrentHashMap<String,ObjectOutputStream >();
-       
+        int index=1; 
 
 		boolean listening=true;
         try {
@@ -25,7 +25,8 @@ public class NServer{
          // one thread only
         while (listening) {
             Socket socket=serverSocket.accept();
-            Thread r=new Thread(new NServerHandler(socket,map,out_map));
+            Thread r=new Thread(new NServerHandler(socket,map,out_map,index));
+            index++;
             r.start();  
         }
 	}

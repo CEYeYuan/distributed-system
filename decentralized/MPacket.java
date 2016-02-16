@@ -12,6 +12,7 @@ public class MPacket implements Serializable {
 
     public static final int HELLO = 100;
     public static final int ACTION = 200;
+    public static final int TOKEN = 1000;
 
     /*The following are the specific action 
     for each type*/

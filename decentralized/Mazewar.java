@@ -38,6 +38,7 @@ import java.net.*;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * The entry point and glue code for the game.  It also contains some helpful
@@ -48,7 +49,8 @@ import java.util.concurrent.*;
 
 public class Mazewar extends JFrame {
 
-        private static final int MAX_CLIENTS=2;
+        private static final int MAX_CLIENTS=3;
+        private static AtomicInteger token = new AtomicInteger(-1);
 
         /**
          * The default width of the {@link Maze}.
@@ -284,9 +286,9 @@ public class Mazewar extends JFrame {
         */
         private void startThreads(){
                 //Start a new sender thread 
-                new Thread(new ClientSenderThread(mSocket, eventQueue)).start();
+                //new Thread(new ClientSenderThread(mSocket, eventQueue)).start();
                 //Start a new listener thread 
-                new Thread(new ClientListenerThread(mSocket, clientTable)).start();    
+                //new Thread(new ClientListenerThread(mSocket, clientTable)).start();    
         }
 
         
@@ -324,8 +326,7 @@ public class Mazewar extends JFrame {
                         return;
                     //the name is already used, choose another one
                     out_map=new ConcurrentHashMap<String,ObjectOutputStream>();  
-                    new Thread(new PeerSender(out_map,args[3])).start();
-                    new Thread(new PeerListenerDispatcher(serverSocket,out_map,args[3],mylocation)).start();//listen to the connection from other peers
+                    new Thread(new PeerListenerDispatcher(serverSocket,out_map,args[3],mylocation,token)).start();//listen to the connection from other peers
                    /***************************************
                    syncing hashmap from server
                     ***************************************/
@@ -336,11 +337,14 @@ public class Mazewar extends JFrame {
                             System.out.println("syncing done: Know "+count+" peers");
                             break;
                         }    
-                        //if(packetFromServer.symbol.equals(args[3]))//myself
-                          //  continue;
+                        if(packetFromServer.type==MPacket.TOKEN){
+                            System.out.println("syncing done: Know "+count+" peers");
+                            token.set(packetFromServer.sequenceNumber);
+                            break;
+                        }  
                         if(out_map.get(packetFromServer.symbol)==null){
                             //System.out.println("trying to connect "+packetFromServer.symbol+" "+packetFromServer.location.toString());
-                            new Thread(new PeerListener(out_map,packetFromServer.symbol,packetFromServer.location,args[3],mylocation)) .start();
+                            new Thread(new PeerListener(out_map,packetFromServer.symbol,packetFromServer.location,args[3],mylocation,token)) .start();
                             count++;
                         }
                     
@@ -370,6 +374,7 @@ public class Mazewar extends JFrame {
                     e.printStackTrace();
                }
              }
+             new Thread(new PeerSender(out_map,args[3],token)).start();      
              Mazewar mazewar = new Mazewar(out_map, args[3]);
              mazewar.startThreads();
         }

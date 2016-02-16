@@ -3,15 +3,18 @@ import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class NServerHandler implements Runnable{
 	private Socket socket = null;
 	private ConcurrentHashMap<String,Location> map=null;
+	private int index;
 	private ConcurrentHashMap<String,ObjectOutputStream> out_map=null;
-	public NServerHandler(Socket socket,ConcurrentHashMap<String,Location> map,ConcurrentHashMap<String,ObjectOutputStream> out_map) {
+	public NServerHandler(Socket socket,ConcurrentHashMap<String,Location> map,ConcurrentHashMap<String,ObjectOutputStream> out_map,int index) {
 		this.map=map;
 		this.socket = socket;
 		this.out_map=out_map;
+		this.index=index;
 		System.out.println("Created new Thread to handle new player");
 	}
 
@@ -62,7 +65,13 @@ public class NServerHandler implements Runnable{
 					toClient.writeObject(packetToClient);
 				}
 				packetToClient = new MPacket();
-				packetToClient.type=MPacket.PACKET_NS_DONE;	
+				if(index==1){
+					//first user
+					packetToClient.type=MPacket.TOKEN ;
+					packetToClient.sequenceNumber=0;
+				}
+				else
+					packetToClient.type=MPacket.PACKET_NS_DONE;	
 				toClient.writeObject(packetToClient);
 			
 

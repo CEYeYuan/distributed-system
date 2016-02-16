@@ -2,6 +2,8 @@ import java.net.*;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class PeerListener extends Thread{
 	Socket socket;
 	ConcurrentHashMap<String,ObjectOutputStream> map;  
@@ -9,17 +11,19 @@ public class PeerListener extends Thread{
 	String peer_name;
 	private String myself;
 	private Location mylocation;
+	AtomicInteger token ;
 	
-	public PeerListener(Socket socket,ConcurrentHashMap<String,ObjectOutputStream> map,String myself,Location mylocation){
+	public PeerListener(Socket socket,ConcurrentHashMap<String,ObjectOutputStream> map,String myself,Location mylocation,AtomicInteger token){
 		//server as sever
 		this.socket=socket;
 		this.map=map;
 		this.myself=myself;
 		this.mylocation=mylocation;
+		this.token=token;
 	}
 
 
-	public PeerListener(ConcurrentHashMap<String,ObjectOutputStream> map,String peer_name,Location peer_location,String myself,Location mylocation){
+	public PeerListener(ConcurrentHashMap<String,ObjectOutputStream> map,String peer_name,Location peer_location,String myself,Location mylocation,AtomicInteger token){
 		//learn from name service
 		try{
 			socket=new Socket(peer_location.host,peer_location.port);
@@ -32,6 +36,7 @@ public class PeerListener extends Thread{
 		this.peer_location=peer_location;
 		this.myself=myself;
 		this.mylocation=mylocation;
+		this.token=token;
 	}
 	public void run(){
 		try{
@@ -64,6 +69,11 @@ public class PeerListener extends Thread{
                 		map.put(packetFromPeer.sender,out);
                 		System.out.println("connection to "+packetFromPeer.sender+packetFromPeer.location.toString()+" added");
                 	}	
+                }
+
+                else if(packetFromPeer.type==MPacket.TOKEN){
+                	token.set(packetFromPeer.sequenceNumber);
+                	continue;//doing nothing
                 }
                 else{
                 	/*
