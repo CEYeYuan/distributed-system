@@ -29,7 +29,7 @@ public class PeerSender extends Thread{
 			
 	}
 
-	private void broadcast(NPacket packet){
+	private void broadcast(MPacket packet){
 		try{
 			for (String s:map.keySet()){
 			ObjectOutputStream tmp=map.get(s);

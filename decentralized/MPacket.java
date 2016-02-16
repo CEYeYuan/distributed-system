@@ -3,6 +3,13 @@ import java.io.Serializable;
 public class MPacket implements Serializable {
 
     /*The following are the type of events*/
+    public static final int PACKET_INTRO = 0;
+    public static final int PACKET_NS_DONE =1;
+    public String symbol;
+    public String sender;
+    public Location location;
+
+
     public static final int HELLO = 100;
     public static final int ACTION = 200;
 
@@ -36,6 +43,9 @@ public class MPacket implements Serializable {
     public int mazeWidth; 
     public Player[] players;
 
+    public MPacket(){
+        
+    } 
     public MPacket(int type, int event){
         this.type = type;
         this.event = event;

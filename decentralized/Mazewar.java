@@ -310,15 +310,15 @@ public class Mazewar extends JFrame {
                     in_lookup = new ObjectInputStream(socket_lookup.getInputStream());
                     serverSocket = new ServerSocket(Integer.parseInt(args[2]));//servers as server
                    
-                    NPacket packetToServer = new NPacket();
+                    MPacket packetToServer = new MPacket();
                     Location mylocation=new  Location(InetAddress.getLocalHost().getHostAddress(),Integer.parseInt(args[2]));
                     packetToServer.location=mylocation;
                     packetToServer.symbol =args[3];
                     out_lookup.writeObject(packetToServer);
 
                         /* print server reply */
-                    NPacket packetFromServer;
-                    packetFromServer = (NPacket) in_lookup.readObject();
+                    MPacket packetFromServer;
+                    packetFromServer = (MPacket) in_lookup.readObject();
                     System.out.println(packetFromServer.symbol);
                     if(packetFromServer.symbol.indexOf("used")!=-1)
                         return;
@@ -331,8 +331,8 @@ public class Mazewar extends JFrame {
                     ***************************************/
                    int count=0;
                    while(true){
-                        packetFromServer = (NPacket) in_lookup.readObject();
-                        if(packetFromServer.type==NPacket.PACKET_NS_DONE){
+                        packetFromServer = (MPacket) in_lookup.readObject();
+                        if(packetFromServer.type==MPacket.PACKET_NS_DONE){
                             System.out.println("syncing done: Know "+count+" peers");
                             break;
                         }    
@@ -362,7 +362,7 @@ public class Mazewar extends JFrame {
             *************************************************************/
 
              /* Create the GUI */
-             while(out_map.size()<MAX_CLIENTS){
+            while(out_map.size()<MAX_CLIENTS){
                 try{
                      Thread.sleep(10);
                 }

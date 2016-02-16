@@ -22,15 +22,15 @@ public class NServerHandler implements Runnable{
 
 				/* stream to read from client */
 				ObjectInputStream fromClient = new ObjectInputStream(socket.getInputStream());
-				NPacket packetFromClient;
+				MPacket packetFromClient;
 				
 				/* stream to write back to client */
 				ObjectOutputStream toClient = new ObjectOutputStream(socket.getOutputStream());				
 
-				packetFromClient = (NPacket) fromClient.readObject();
+				packetFromClient = (MPacket) fromClient.readObject();
 				/* create a packet to send reply back to client */
-				NPacket packetToClient = new NPacket();
-				NPacket myself=new NPacket();
+				MPacket packetToClient = new MPacket();
+				MPacket myself=new MPacket();
 			
 				if(map.get(packetFromClient.symbol)==null){
 					map.put(packetFromClient.symbol,packetFromClient.location);
@@ -56,13 +56,13 @@ public class NServerHandler implements Runnable{
 				//sync the global hashmap
 				System.out.println("syncing "+myself.symbol+"'s local hashmap");
 				for(String s:map.keySet()){
-					packetToClient = new NPacket();
+					packetToClient = new MPacket();
 					packetToClient.symbol=s;
 					packetToClient.location=map.get(s);
 					toClient.writeObject(packetToClient);
 				}
-				packetToClient = new NPacket();
-				packetToClient.type=NPacket.PACKET_NS_DONE;	
+				packetToClient = new MPacket();
+				packetToClient.type=MPacket.PACKET_NS_DONE;	
 				toClient.writeObject(packetToClient);
 			
 

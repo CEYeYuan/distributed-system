@@ -42,10 +42,10 @@ public class PeerListener extends Thread{
 			if(peer_name!=null&&peer_location!=null){
 				//learn directly from naming service, introduce my self
 				map.put(peer_name,out);
-				NPacket packetToPeer = new NPacket();  
+				MPacket packetToPeer = new MPacket();  
 		        packetToPeer.location=mylocation;
 		        packetToPeer.sender =myself;
-		        packetToPeer.type=NPacket.PACKET_INTRO;
+		        packetToPeer.type=MPacket.PACKET_INTRO;
 		        out.writeObject(packetToPeer);
 		        out.flush();
 		      	System.out.println("connection to "+peer_name+peer_location.toString()+" added");	           
@@ -56,9 +56,9 @@ public class PeerListener extends Thread{
 	
 						
 			while(true){
-				NPacket packetFromPeer;
-                packetFromPeer = (NPacket) in.readObject();
-                if(packetFromPeer.type==NPacket.PACKET_INTRO){
+				MPacket packetFromPeer;
+                packetFromPeer = (MPacket) in.readObject();
+                if(packetFromPeer.type==MPacket.PACKET_INTRO){
                 	//learn by other client's broadcast
                 	if(map.get(packetFromPeer.sender)==null){
                 		map.put(packetFromPeer.sender,out);
