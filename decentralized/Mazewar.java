@@ -34,6 +34,10 @@ import java.net.Socket;
 import java.util.Hashtable;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.net.*;
+import java.io.*;
+import java.util.*;
+import java.util.concurrent.*;
 
 /**
  * The entry point and glue code for the game.  It also contains some helpful
@@ -43,6 +47,8 @@ import java.util.concurrent.BlockingQueue;
  */
 
 public class Mazewar extends JFrame {
+
+        private static final int MAX_CLIENTS=2;
 
         /**
          * The default width of the {@link Maze}.
@@ -60,7 +66,7 @@ public class Mazewar extends JFrame {
          * the same seed value, or your mazes will be different.
          */
         private final int mazeSeed = 42;
-
+        private Random randomGen = new Random(mazeSeed); 
         /**
          * The {@link Maze} that the game uses.
          */
@@ -145,7 +151,7 @@ public class Mazewar extends JFrame {
         /** 
          * The place where all the pieces are put together. 
          */
-        public Mazewar(String serverHost, int serverPort) throws IOException,
+        public Mazewar(ConcurrentHashMap<String,ObjectOutputStream> map,String name) throws IOException,
                                                 ClassNotFoundException {
                 super("ECE419 Mazewar");
                 consolePrintLn("ECE419 Mazewar started!");
@@ -161,43 +167,41 @@ public class Mazewar extends JFrame {
                 maze.addMazeListener(scoreModel);
                 
                 // Throw up a dialog to get the GUIClient name.
-                String name = JOptionPane.showInputDialog("Enter your name");
                 if((name == null) || (name.length() == 0)) {
                   Mazewar.quit();
                 }
                 
-                mSocket = new MSocket(serverHost, serverPort);
-                //Send hello packet to server
-                MPacket hello = new MPacket(name, MPacket.HELLO, MPacket.HELLO_INIT);
-                hello.mazeWidth = mazeWidth;
-                hello.mazeHeight = mazeHeight;
-                
-                if(Debug.debug) System.out.println("Sending hello");
-                mSocket.writeObject(hello);
-                if(Debug.debug) System.out.println("hello sent");
-                //Receive response from server
-                MPacket resp = (MPacket)mSocket.readObject();
-                if(Debug.debug) System.out.println("Received response from server");
-
+             
                 //Initialize queue of events
                 eventQueue = new LinkedBlockingQueue<MPacket>();
                 //Initialize hash table of clients to client name 
                 clientTable = new Hashtable<String, Client>(); 
                 
-                // Create the GUIClient and connect it to the KeyListener queue
-                //RemoteClient remoteClient = null;
-                for(Player player: resp.players){  
-                        if(player.name.equals(name)){
-                        	if(Debug.debug)System.out.println("Adding guiClient: " + player);
+                //Create the GUIClient and connect it to the KeyListener queue
+                RemoteClient remoteClient = null;
+
+                int i=0;
+                String user_list[]=new String[map.size()];
+                for (String s:map.keySet()){
+                        user_list[i]=s;
+                        i++;
+                }
+                Arrays.sort(user_list);
+        
+                for(String s: user_list){  
+                        if(s.equals(name)){
+                        	if(Debug.debug)System.out.println("Adding guiClient: " + s);
                                 guiClient = new GUIClient(name, eventQueue);
-                                maze.addClientAt(guiClient, player.point, player.direction);
+                                Point point =new Point(randomGen.nextInt(mazeWidth),randomGen.nextInt(mazeHeight));
+                                maze.addClientAt(guiClient, point, Player.North);
                                 this.addKeyListener(guiClient);
-                                clientTable.put(player.name, guiClient);
+                                clientTable.put(s, guiClient);
                         }else{
-                        	if(Debug.debug)System.out.println("Adding remoteClient: " + player);
-                                RemoteClient remoteClient = new RemoteClient(player.name);
-                                maze.addClientAt(remoteClient, player.point, player.direction);
-                                clientTable.put(player.name, remoteClient);
+                        	if(Debug.debug)System.out.println("Adding remoteClient: " + s);
+                               remoteClient = new RemoteClient(s);
+                                Point point =new Point(randomGen.nextInt(mazeWidth),randomGen.nextInt(mazeHeight));
+                                maze.addClientAt(remoteClient, point, Player.North);
+                                clientTable.put(s, remoteClient);
                         }
                 }
                 
@@ -293,10 +297,80 @@ public class Mazewar extends JFrame {
         public static void main(String args[]) throws IOException,
                                         ClassNotFoundException{
 
-             String host = args[0];
-             int port = Integer.parseInt(args[1]);
+            ServerSocket serverSocket = null;
+            Socket socket_lookup=null;
+            boolean listening = true;
+            ObjectOutputStream out_lookup=null;
+            ObjectInputStream in_lookup=null;
+            ConcurrentHashMap<String,ObjectOutputStream> out_map=null;
+            try {
+                if(args.length == 4) {
+                    socket_lookup=new Socket(args[0],Integer.parseInt(args[1]));
+                    out_lookup = new ObjectOutputStream(socket_lookup.getOutputStream());
+                    in_lookup = new ObjectInputStream(socket_lookup.getInputStream());
+                    serverSocket = new ServerSocket(Integer.parseInt(args[2]));//servers as server
+                   
+                    NPacket packetToServer = new NPacket();
+                    Location mylocation=new  Location(InetAddress.getLocalHost().getHostAddress(),Integer.parseInt(args[2]));
+                    packetToServer.location=mylocation;
+                    packetToServer.symbol =args[3];
+                    out_lookup.writeObject(packetToServer);
+
+                        /* print server reply */
+                    NPacket packetFromServer;
+                    packetFromServer = (NPacket) in_lookup.readObject();
+                    System.out.println(packetFromServer.symbol);
+                    if(packetFromServer.symbol.indexOf("used")!=-1)
+                        return;
+                    //the name is already used, choose another one
+                    out_map=new ConcurrentHashMap<String,ObjectOutputStream>();  
+                    new Thread(new PeerSender(out_map,args[3])).start();
+                    new Thread(new PeerListenerDispatcher(serverSocket,out_map,args[3],mylocation)).start();//listen to the connection from other peers
+                   /***************************************
+                   syncing hashmap from server
+                    ***************************************/
+                   int count=0;
+                   while(true){
+                        packetFromServer = (NPacket) in_lookup.readObject();
+                        if(packetFromServer.type==NPacket.PACKET_NS_DONE){
+                            System.out.println("syncing done: Know "+count+" peers");
+                            break;
+                        }    
+                        //if(packetFromServer.symbol.equals(args[3]))//myself
+                          //  continue;
+                        if(out_map.get(packetFromServer.symbol)==null){
+                            //System.out.println("trying to connect "+packetFromServer.symbol+" "+packetFromServer.location.toString());
+                            new Thread(new PeerListener(out_map,packetFromServer.symbol,packetFromServer.location,args[3],mylocation)) .start();
+                            count++;
+                        }
+                    
+                    }
+
+                   
+                } else {
+                    System.err.println("ERROR: Invalid arguments!");
+                    System.exit(-1);
+                }
+            } catch (Exception e) {
+                System.err.println("ERROR: Could not listen on port!");
+                System.exit(-1);
+            }
+            /************************************************************
+            each client is a server to all the other clients, and it's a 
+            client to all the other clients and naming service as well as the
+            naming server
+            *************************************************************/
+
              /* Create the GUI */
-             Mazewar mazewar = new Mazewar(host, port);
+             while(out_map.size()<MAX_CLIENTS){
+                try{
+                     Thread.sleep(10);
+                }
+               catch(Exception e){
+                    e.printStackTrace();
+               }
+             }
+             Mazewar mazewar = new Mazewar(out_map, args[3]);
              mazewar.startThreads();
         }
 }
