@@ -21,10 +21,6 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Iterator;
 
-<<<<<<< HEAD
-
-=======
->>>>>>> latest
 /**
  * An abstract class for clients in a maze. 
  * @author Geoffrey Washburn &lt;<a href="mailto:geoffw@cis.upenn.edu">geoffw@cis.upenn.edu</a>&gt;

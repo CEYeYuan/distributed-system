@@ -48,11 +48,8 @@ import java.util.concurrent.*;
 
 public class Mazewar extends JFrame {
 
-<<<<<<< HEAD
-=======
         private static final int MAX_CLIENTS=2;
 
->>>>>>> latest
         /**
          * The default width of the {@link Maze}.
          */
@@ -69,11 +66,7 @@ public class Mazewar extends JFrame {
          * the same seed value, or your mazes will be different.
          */
         private final int mazeSeed = 42;
-<<<<<<< HEAD
-
-=======
         private Random randomGen = new Random(mazeSeed); 
->>>>>>> latest
         /**
          * The {@link Maze} that the game uses.
          */
@@ -158,11 +151,7 @@ public class Mazewar extends JFrame {
         /** 
          * The place where all the pieces are put together. 
          */
-<<<<<<< HEAD
-        public Mazewar(String serverHost, int serverPort) throws IOException,
-=======
         public Mazewar(ConcurrentHashMap<String,ObjectOutputStream> map,String name) throws IOException,
->>>>>>> latest
                                                 ClassNotFoundException {
                 super("ECE419 Mazewar");
                 consolePrintLn("ECE419 Mazewar started!");
@@ -178,52 +167,16 @@ public class Mazewar extends JFrame {
                 maze.addMazeListener(scoreModel);
                 
                 // Throw up a dialog to get the GUIClient name.
-<<<<<<< HEAD
-                String name = JOptionPane.showInputDialog("Enter your name");
-=======
->>>>>>> latest
                 if((name == null) || (name.length() == 0)) {
                   Mazewar.quit();
                 }
                 
-<<<<<<< HEAD
-                mSocket = new MSocket(serverHost, serverPort);
-                //Send hello packet to server
-                MPacket hello = new MPacket(name, MPacket.HELLO, MPacket.HELLO_INIT);
-                hello.mazeWidth = mazeWidth;
-                hello.mazeHeight = mazeHeight;
-                
-                if(Debug.debug) System.out.println("Sending hello");
-                mSocket.writeObject(hello);
-                if(Debug.debug) System.out.println("hello sent");
-                //Receive response from server
-                MPacket resp = (MPacket)mSocket.readObject();
-                if(Debug.debug) System.out.println("Received response from server");
-
-=======
              
->>>>>>> latest
                 //Initialize queue of events
                 eventQueue = new LinkedBlockingQueue<MPacket>();
                 //Initialize hash table of clients to client name 
                 clientTable = new Hashtable<String, Client>(); 
                 
-<<<<<<< HEAD
-                // Create the GUIClient and connect it to the KeyListener queue
-                //RemoteClient remoteClient = null;
-                for(Player player: resp.players){  
-                        if(player.name.equals(name)){
-                        	if(Debug.debug)System.out.println("Adding guiClient: " + player);
-                                guiClient = new GUIClient(name, eventQueue);
-                                maze.addClientAt(guiClient, player.point, player.direction);
-                                this.addKeyListener(guiClient);
-                                clientTable.put(player.name, guiClient);
-                        }else{
-                        	if(Debug.debug)System.out.println("Adding remoteClient: " + player);
-                                RemoteClient remoteClient = new RemoteClient(player.name);
-                                maze.addClientAt(remoteClient, player.point, player.direction);
-                                clientTable.put(player.name, remoteClient);
-=======
                 //Create the GUIClient and connect it to the KeyListener queue
                 RemoteClient remoteClient = null;
 
@@ -249,7 +202,6 @@ public class Mazewar extends JFrame {
                                 Point point =new Point(randomGen.nextInt(mazeWidth),randomGen.nextInt(mazeHeight));
                                 maze.addClientAt(remoteClient, point, Player.North);
                                 clientTable.put(s, remoteClient);
->>>>>>> latest
                         }
                 }
                 
@@ -350,10 +302,7 @@ public class Mazewar extends JFrame {
             boolean listening = true;
             ObjectOutputStream out_lookup=null;
             ObjectInputStream in_lookup=null;
-<<<<<<< HEAD
-=======
             ConcurrentHashMap<String,ObjectOutputStream> out_map=null;
->>>>>>> latest
             try {
                 if(args.length == 4) {
                     socket_lookup=new Socket(args[0],Integer.parseInt(args[1]));
@@ -374,11 +323,7 @@ public class Mazewar extends JFrame {
                     if(packetFromServer.symbol.indexOf("used")!=-1)
                         return;
                     //the name is already used, choose another one
-<<<<<<< HEAD
-                    ConcurrentHashMap<String,ObjectOutputStream> out_map=new ConcurrentHashMap<String,ObjectOutputStream>();  
-=======
                     out_map=new ConcurrentHashMap<String,ObjectOutputStream>();  
->>>>>>> latest
                     new Thread(new PeerSender(out_map,args[3])).start();
                     new Thread(new PeerListenerDispatcher(serverSocket,out_map,args[3],mylocation)).start();//listen to the connection from other peers
                    /***************************************
@@ -391,15 +336,10 @@ public class Mazewar extends JFrame {
                             System.out.println("syncing done: Know "+count+" peers");
                             break;
                         }    
-<<<<<<< HEAD
-                   
-                        if(out_map.get(packetFromServer.symbol)==null){
-=======
                         //if(packetFromServer.symbol.equals(args[3]))//myself
                           //  continue;
                         if(out_map.get(packetFromServer.symbol)==null){
                             //System.out.println("trying to connect "+packetFromServer.symbol+" "+packetFromServer.location.toString());
->>>>>>> latest
                             new Thread(new PeerListener(out_map,packetFromServer.symbol,packetFromServer.location,args[3],mylocation)) .start();
                             count++;
                         }
@@ -421,12 +361,6 @@ public class Mazewar extends JFrame {
             naming server
             *************************************************************/
 
-<<<<<<< HEAD
-             String host = args[0];
-             int port = Integer.parseInt(args[1]);
-             /* Create the GUI */
-             Mazewar mazewar = new Mazewar(host, port);
-=======
              /* Create the GUI */
              while(out_map.size()<MAX_CLIENTS){
                 try{
@@ -437,7 +371,6 @@ public class Mazewar extends JFrame {
                }
              }
              Mazewar mazewar = new Mazewar(out_map, args[3]);
->>>>>>> latest
              mazewar.startThreads();
         }
 }

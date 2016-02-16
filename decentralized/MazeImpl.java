@@ -74,14 +74,10 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                 randomGen = new Random(seed);
                 
                 // Build the maze starting at the corner
-<<<<<<< HEAD
-                buildMaze(new Point(0,0));
-=======
                 if(seed == 0)
                     buildEmptyMaze();
                 else
                     buildMaze(new Point(0,0));
->>>>>>> latest
 
                 thread.start();
         }
@@ -135,11 +131,7 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                                         }
                                 }
                                 
-<<<<<<< HEAD
-                        }       
-=======
                         }	    
->>>>>>> latest
                         System.out.print("\n");
                         for(int j = 0; j < maxX; j++) {
                                 CellImpl cell = getCellImpl(new Point(j,i));
@@ -180,11 +172,7 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                                                 } else {
                                                         System.out.print("+ ");
                                                 }
-<<<<<<< HEAD
-                                        }       
-=======
                                         }		
->>>>>>> latest
                                 }
                                 System.out.print("\n");     
                         }   
@@ -221,8 +209,6 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                 addClient(client, point);
         }
         
-<<<<<<< HEAD
-=======
         public synchronized void addClientAt(Client client, Point point,
                                              int direction){
                 //Adapted from addClient(Client client)
@@ -253,7 +239,6 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                 
         }
         
->>>>>>> latest
         public synchronized Point getClientPoint(Client client) {
                 assert(client != null);
                 Object o = clientMap.get(client);
@@ -472,15 +457,9 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                 assert(client != null);
                 assert(checkBounds(point));
                 CellImpl cell = getCellImpl(point);
-<<<<<<< HEAD
-                Direction d = Direction.random();
-                while(cell.isWall(d)) {
-                  d = Direction.random();
-=======
                 Direction d = Direction.random(randomGen);
                 while(cell.isWall(d)) {
                   d = Direction.random(randomGen);
->>>>>>> latest
                 }
                 cell.setContents(client);
                 clientMap.put(client, new DirectedPoint(point, d));
@@ -513,11 +492,6 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                         point = new Point(randomGen.nextInt(maxX),randomGen.nextInt(maxY));
                         cell = getCellImpl(point);
                 }
-<<<<<<< HEAD
-                Direction d = Direction.random();
-                while(cell.isWall(d)) {
-                        d = Direction.random();
-=======
 
                 /***********************************************************		
  -                Every time, we 're creating a new Direction object, and what's 		
@@ -528,7 +502,6 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                 Direction d = Direction.random(randomGen);
                 while(cell.isWall(d)) {
                         d = Direction.random(randomGen);
->>>>>>> latest
                 }
                 cell.setContents(target);
                 clientMap.put(target, new DirectedPoint(point, d));
@@ -599,11 +572,7 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                 clientMap.put(client, newPoint);
                 newCell.setContents(client);
                 /* Clear the old cell */
-<<<<<<< HEAD
-                oldCell.setContents(null);  
-=======
                 oldCell.setContents(null);	
->>>>>>> latest
                 
                 update();
                 return true; 
@@ -875,11 +844,7 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                         Direction.South };
                         
                         // Create a vector of the possible choices
-<<<<<<< HEAD
-                        Vector options = new Vector();         
-=======
                         Vector options = new Vector();	       
->>>>>>> latest
                         
                         // Iterate through the directions and see which
                         // Cells have been visited, adding those that haven't
@@ -915,19 +880,13 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                 CellImpl cell = getCellImpl(point);
                 cell.setVisited();
                 Direction d = pickNeighbor(point);
-<<<<<<< HEAD
-                while(d != null) {      
-=======
                 while(d != null) {	    
->>>>>>> latest
                         removeWall(point, d);
                         Point newPoint = point.move(d);
                         buildMaze(newPoint);
                         d = pickNeighbor(point);
                 }
         }
-<<<<<<< HEAD
-=======
         
         /**
          * Build a {@link Maze} with only
@@ -968,7 +927,6 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                 }
                     
         }
->>>>>>> latest
        
         /** 
          * Obtain the {@link CellImpl} at the specified point. 
@@ -984,8 +942,4 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                 assert(o2 instanceof CellImpl);
                 return (CellImpl)o2;
         }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> latest
