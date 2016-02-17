@@ -56,13 +56,15 @@ public class PeerSender implements Runnable {
                     
                     //System.out.println(myself+" hold the token "+" seq: " +token.get()+",then pass to "+findNext());
                     
+                    
                     ObjectOutputStream out=map.get(findNext());
                     MPacket packetToClient = new MPacket();
                     packetToClient.type=MPacket.TOKEN ;
                     packetToClient.sequenceNumber=token.get();
-                    Thread.sleep(10);
                     out.writeObject(packetToClient);
                     token.set(-1);
+                    Thread.sleep(10);
+                    
                 }
             }
         }
