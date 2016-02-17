@@ -49,7 +49,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Mazewar extends JFrame {
 
-        private static final int MAX_CLIENTS=2;
+        private static final int MAX_CLIENTS=4;
         private static AtomicInteger token = new AtomicInteger(-1);
 
         /**
