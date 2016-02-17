@@ -12,9 +12,10 @@ public class PeerListener extends Thread{
 	String myself;
 	Location mylocation;
 	AtomicInteger token ;
-	Hashtable<String, Client> clientTable = null;
+	ConcurrentHashMap<String, Client> clientTable = null;
+	AtomicInteger seq ;
 	
-	public PeerListener(Socket socket,ConcurrentHashMap<String,ObjectOutputStream> map,String myself,Location mylocation,AtomicInteger token,Hashtable<String, Client> clientTable){
+	public PeerListener(Socket socket,ConcurrentHashMap<String,ObjectOutputStream> map,String myself,Location mylocation,AtomicInteger token, ConcurrentHashMap<String, Client>clientTable, AtomicInteger seq){
 		//server as sever
 		this.socket=socket;
 		this.map=map;
@@ -22,10 +23,11 @@ public class PeerListener extends Thread{
 		this.mylocation=mylocation;
 		this.token=token;
 		this.clientTable=clientTable;
+		this.seq=seq;
 	}
 
 
-	public PeerListener(ConcurrentHashMap<String,ObjectOutputStream> map,String peer_name,Location peer_location,String myself,Location mylocation,AtomicInteger token,Hashtable<String, Client> clientTable){
+	public PeerListener(ConcurrentHashMap<String,ObjectOutputStream> map,String peer_name,Location peer_location,String myself,Location mylocation,AtomicInteger token, ConcurrentHashMap<String, Client> clientTable,AtomicInteger seq){
 		//learn from name service
 		try{
 			socket=new Socket(peer_location.host,peer_location.port);
@@ -40,6 +42,7 @@ public class PeerListener extends Thread{
 		this.mylocation=mylocation;
 		this.token=token;
 		this.clientTable=clientTable;
+		this.seq=seq;
 	}
 	public void run(){
 		try{
@@ -55,7 +58,6 @@ public class PeerListener extends Thread{
 	                   and then execute
 	                3. if not, just wait for the next command   
 	        *****************************************************************/
-	        int seq=0;
 	        PriorityQueue<MPacket> queue = new PriorityQueue<MPacket>(20,new Comparator<MPacket>() {
 	            @Override
 	            public int compare(MPacket p1, MPacket p2) {
@@ -100,30 +102,25 @@ public class PeerListener extends Thread{
 
                 else if(packetFromPeer.type==MPacket.PACKET_NORMAL){
                 	received = packetFromPeer;
-	                System.out.println("Received " + received);
+	                System.out.println("Received " + received+" current seq="+seq);
 	                queue.add(received);
 	                while(!queue.isEmpty()){
-	                    if(queue.peek().sequenceNumber==seq){
+	                    if(queue.peek().sequenceNumber==seq.get()){
 	                        System.out.println("ececuting seq.: "+seq);
+	                        seq.addAndGet(1);
 	                        received=queue.poll();
-	                        System.out.println("size: "+clientTable.size());
-	                        System.out.println(received);
 	                        client = clientTable.get(received.name);
 	                        if(received.event == MPacket.UP){
 	                            client.forward();
-	                            seq++;
 	                        }else if(received.event == MPacket.DOWN){
 	                            client.backup();
-	                            seq++;
 	                        }else if(received.event == MPacket.LEFT){
 	                            client.turnLeft();
-	                            seq++;
 	                        }else if(received.event == MPacket.RIGHT){
 	                            client.turnRight();
-	                            seq++;
 	                        }else if(received.event == MPacket.FIRE){
 	                            client.fire();
-	                            seq++;
+	                           
 	                        }else{
 	                            throw new UnsupportedOperationException();
 	                        }    

@@ -60,7 +60,7 @@ public class PeerSender implements Runnable {
                     MPacket packetToClient = new MPacket();
                     packetToClient.type=MPacket.TOKEN ;
                     packetToClient.sequenceNumber=token.get();
-                    Thread.sleep(1000);
+                    Thread.sleep(10);
                     out.writeObject(packetToClient);
                     token.set(-1);
                 }

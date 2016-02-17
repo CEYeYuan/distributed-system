@@ -91,7 +91,7 @@ public class Mazewar extends JFrame {
         /**
          * A map of {@link Client} clients to client name.
          */
-        public static  Hashtable<String, Client> clientTable = new Hashtable<String,Client>();
+        public static  ConcurrentHashMap<String, Client> clientTable = new  ConcurrentHashMap<String,Client>();
 
         /**
          * A queue of events.
@@ -312,6 +312,7 @@ public class Mazewar extends JFrame {
                     out_lookup = new ObjectOutputStream(socket_lookup.getOutputStream());
                     in_lookup = new ObjectInputStream(socket_lookup.getInputStream());
                     serverSocket = new ServerSocket(Integer.parseInt(args[2]));//servers as server
+                    AtomicInteger seq = new AtomicInteger(0);
                    
                     MPacket packetToServer = new MPacket();
                     Location mylocation=new  Location(InetAddress.getLocalHost().getHostAddress(),Integer.parseInt(args[2]));
@@ -327,7 +328,7 @@ public class Mazewar extends JFrame {
                         return;
                     //the name is already used, choose another one
                     out_map=new ConcurrentHashMap<String,ObjectOutputStream>();  
-                    new Thread(new PeerListenerDispatcher(serverSocket,out_map,args[3],mylocation,token,clientTable)).start();//listen to the connection from other peers
+                    new Thread(new PeerListenerDispatcher(serverSocket,out_map,args[3],mylocation,token,clientTable,seq)).start();//listen to the connection from other peers
                    /***************************************
                    syncing hashmap from server
                     ***************************************/
@@ -345,7 +346,7 @@ public class Mazewar extends JFrame {
                         }  
                         if(out_map.get(packetFromServer.symbol)==null){
                             //System.out.println("trying to connect "+packetFromServer.symbol+" "+packetFromServer.location.toString());
-                            new Thread(new PeerListener(out_map,packetFromServer.symbol,packetFromServer.location,args[3],mylocation,token,clientTable)) .start();
+                            new Thread(new PeerListener(out_map,packetFromServer.symbol,packetFromServer.location,args[3],mylocation,token,clientTable,seq)) .start();
                             count++;
                         }
                     
