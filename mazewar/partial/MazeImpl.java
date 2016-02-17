@@ -19,7 +19,6 @@ USA.
 
 import java.lang.Thread;
 import java.lang.Runnable;
-import java.io.*;
 import java.io.Serializable;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -36,9 +35,6 @@ import java.util.Iterator;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.HashMap;
-import java.util.concurrent.BlockingQueue;
-
-
 
 /**
  * A concrete implementation of a {@link Maze}.  
@@ -54,12 +50,7 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
          * size of the maze.
          * @param seed Initial seed for the random number generator.
          */
-        private String name = null;
-        private BlockingQueue eventQueue = null;
-        public MazeImpl(Point point, long seed, String name, BlockingQueue eventQueue) {
-                this.name = name;
-                this.eventQueue = eventQueue;
-
+        public MazeImpl(Point point, long seed) {
                 maxX = point.getX();
                 assert(maxX > 0);
                 maxY = point.getY();
@@ -140,7 +131,7 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                                         }
                                 }
                                 
-                        }       
+                        }	    
                         System.out.print("\n");
                         for(int j = 0; j < maxX; j++) {
                                 CellImpl cell = getCellImpl(new Point(j,i));
@@ -181,7 +172,7 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                                                 } else {
                                                         System.out.print("+ ");
                                                 }
-                                        }       
+                                        }		
                                 }
                                 System.out.print("\n");     
                         }   
@@ -308,7 +299,7 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                                 update();
                                 return true; 
                         } else {
-                        // Otherwise fail (bullets will destroy each other
+                        // Otherwise fail (bullets will destroy each other)
                                 return false;
                         }
                 }
@@ -372,11 +363,8 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
         /**
          * Control loop for {@link Projectile}s.
          */
-
-
         public void run() {
                 Collection deadPrj = new HashSet();
-
                 while(true) {
                         if(!projectileMap.isEmpty()) {
                                 Iterator it = projectileMap.keySet().iterator();
@@ -384,13 +372,9 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                                         while(it.hasNext()) {   
                                                 Object o = it.next();
                                                 assert(o instanceof Projectile);
-
-                                                if (!deadPrj.contains(o)) {
-                                                    deadPrj.addAll(moveProjectile((Projectile)o));
-                                                }     
+                                                deadPrj.addAll(moveProjectile((Projectile)o));
                                         }               
                                         it = deadPrj.iterator();
-                                        //update();
                                         while(it.hasNext()) {
                                                 Object o = it.next();
                                                 assert(o instanceof Projectile);
@@ -404,8 +388,7 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                         try {
                                 thread.sleep(200);
                         } catch(Exception e) {
-                            System.out.println(e.getMessage());
-                            // shouldn't happen
+                                // shouldn't happen
                         }
                 }
         }
@@ -510,10 +493,10 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                         cell = getCellImpl(point);
                 }
 
-                /***********************************************************        
- -                Every time, we 're creating a new Direction object, and what's        
- -                worse is that we init a new randome generator that we didn't control      
- -                the seed ! So it's better to pass in a global random generator.       
+                /***********************************************************		
+ -                Every time, we 're creating a new Direction object, and what's 		
+ -                worse is that we init a new randome generator that we didn't control		
+ -                the seed ! So it's better to pass in a global random generator.		
  -                ************************************************************/
  
                 Direction d = Direction.random(randomGen);
@@ -589,13 +572,11 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                 clientMap.put(client, newPoint);
                 newCell.setContents(client);
                 /* Clear the old cell */
-                oldCell.setContents(null);  
+                oldCell.setContents(null);	
                 
                 update();
                 return true; 
         }
-
-        
        
         /**
          * The random number generator used by the {@link Maze}.
@@ -863,7 +844,7 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                         Direction.South };
                         
                         // Create a vector of the possible choices
-                        Vector options = new Vector();         
+                        Vector options = new Vector();	       
                         
                         // Iterate through the directions and see which
                         // Cells have been visited, adding those that haven't
@@ -899,7 +880,7 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                 CellImpl cell = getCellImpl(point);
                 cell.setVisited();
                 Direction d = pickNeighbor(point);
-                while(d != null) {      
+                while(d != null) {	    
                         removeWall(point, d);
                         Point newPoint = point.move(d);
                         buildMaze(newPoint);

@@ -5,6 +5,7 @@ public class MPacket implements Serializable {
     /*The following are the type of events*/
     public static final int PACKET_INTRO = 0;
     public static final int PACKET_NS_DONE =1;
+    public static final int PACKET_NORMAL =2;
     public String symbol;
     public String sender;
     public Location location;

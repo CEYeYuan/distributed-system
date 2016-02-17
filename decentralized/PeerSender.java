@@ -10,25 +10,49 @@ public class PeerSender extends Thread{
 	boolean added=false;
 	String arr[];
 	AtomicInteger token ;
+	BlockingQueue<MPacket> eventQueue=null;
 
 
-	public PeerSender(ConcurrentHashMap<String,ObjectOutputStream> map,String myself,AtomicInteger token){
+	public PeerSender(ConcurrentHashMap<String,ObjectOutputStream> map,String myself,AtomicInteger token,BlockingQueue eventQueue){
 		this.map=map;
 		this.myself=myself;
 		this.token=token;
+		this.eventQueue=eventQueue;
 	}
 
 	public void run(){
 		try{
 			while(true){
-				if(token.get()==-1)
-					continue;
+
+				if(token.get()==-1){
+			        continue;//not holding token, do nothing
+				}
+					
 				else{
+
+					if(eventQueue.size()!=0){
+						//do have at least one packet to broadcast
+						try{                
+		                //Take packet from queue
+			            	MPacket to_all = (MPacket)eventQueue.take();
+			            	to_all.type=MPacket.PACKET_NORMAL;
+			                //add a sequence number to make sure a client's move won't be out of order
+			                to_all.sequenceNumber=token.get();
+			               	token.getAndAdd(1);
+			                if(Debug.debug) System.out.println("broadcast opration " + to_all);
+		               		broadcast(to_all);    
+				         }catch(InterruptedException e){
+			                e.printStackTrace();
+			                Thread.currentThread().interrupt();    
+				        } 
+					}
+
+					
 					System.out.println(myself+" hold the token "+" seq: " +token.get()+",then pass to "+findNext());
 					ObjectOutputStream out=map.get(findNext());
 					MPacket packetToClient = new MPacket();
 					packetToClient.type=MPacket.TOKEN ;
-					packetToClient.sequenceNumber=token.get()+1;
+					packetToClient.sequenceNumber=token.get();
 					Thread.sleep(2000);
 					out.writeObject(packetToClient);
 					token.set(-1);

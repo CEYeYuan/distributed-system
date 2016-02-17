@@ -49,7 +49,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Mazewar extends JFrame {
 
-        private static final int MAX_CLIENTS=3;
+        private static final int MAX_CLIENTS=2;
         private static AtomicInteger token = new AtomicInteger(-1);
 
         /**
@@ -96,7 +96,7 @@ public class Mazewar extends JFrame {
         /**
          * A queue of events.
          */
-        private BlockingQueue eventQueue = null;
+        private  BlockingQueue eventQueue = null;
         
         /**
          * The panel that displays the {@link Maze}.
@@ -285,8 +285,8 @@ public class Mazewar extends JFrame {
          listening for events
         */
         private void startThreads(){
-                //Start a new sender thread 
-                //new Thread(new ClientSenderThread(mSocket, eventQueue)).start();
+                //Start a new listener thread for keyboard input 
+                new Thread(new ClientListenerKeyBoard( eventQueue)).start();
                 //Start a new listener thread 
                 //new Thread(new ClientListenerThread(mSocket, clientTable)).start();    
         }
@@ -374,7 +374,7 @@ public class Mazewar extends JFrame {
                     e.printStackTrace();
                }
              }
-             new Thread(new PeerSender(out_map,args[3],token)).start();      
+             //new Thread(new PeerSender(out_map,args[3],token,eventQueue)).start();      
              Mazewar mazewar = new Mazewar(out_map, args[3]);
              mazewar.startThreads();
         }
