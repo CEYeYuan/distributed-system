@@ -91,7 +91,7 @@ public class Mazewar extends JFrame {
         /**
          * A map of {@link Client} clients to client name.
          */
-        private Hashtable<String, Client> clientTable = null;
+        public static  Hashtable<String, Client> clientTable = new Hashtable<String,Client>();
 
         /**
          * A queue of events.
@@ -177,7 +177,7 @@ public class Mazewar extends JFrame {
                 //Initialize queue of events
                 eventQueue = new LinkedBlockingQueue<MPacket>();
                 //Initialize hash table of clients to client name 
-                clientTable = new Hashtable<String, Client>(); 
+               // clientTable = new Hashtable<String, Client>(); 
                 
                 //Create the GUIClient and connect it to the KeyListener queue
                 RemoteClient remoteClient = null;
@@ -284,11 +284,12 @@ public class Mazewar extends JFrame {
          and the ClientListenerThread which is responsible for 
          listening for events
         */
-        private void startThreads(){
+        private void startThreads(ConcurrentHashMap<String,ObjectOutputStream> out_map,String name){
                 //Start a new listener thread for keyboard input 
-                new Thread(new ClientListenerKeyBoard( eventQueue)).start();
+                //new Thread(new ClientListenerKeyBoard( eventQueue)).start();
                 //Start a new listener thread 
-                //new Thread(new ClientListenerThread(mSocket, clientTable)).start();    
+                //new Thread(new ClientListenerThread(mSocket, clientTable)).start();   
+                new Thread(new PeerSender(out_map,name,token,eventQueue)).start();    
         }
 
         
@@ -326,7 +327,7 @@ public class Mazewar extends JFrame {
                         return;
                     //the name is already used, choose another one
                     out_map=new ConcurrentHashMap<String,ObjectOutputStream>();  
-                    new Thread(new PeerListenerDispatcher(serverSocket,out_map,args[3],mylocation,token)).start();//listen to the connection from other peers
+                    new Thread(new PeerListenerDispatcher(serverSocket,out_map,args[3],mylocation,token,clientTable)).start();//listen to the connection from other peers
                    /***************************************
                    syncing hashmap from server
                     ***************************************/
@@ -344,7 +345,7 @@ public class Mazewar extends JFrame {
                         }  
                         if(out_map.get(packetFromServer.symbol)==null){
                             //System.out.println("trying to connect "+packetFromServer.symbol+" "+packetFromServer.location.toString());
-                            new Thread(new PeerListener(out_map,packetFromServer.symbol,packetFromServer.location,args[3],mylocation,token)) .start();
+                            new Thread(new PeerListener(out_map,packetFromServer.symbol,packetFromServer.location,args[3],mylocation,token,clientTable)) .start();
                             count++;
                         }
                     
@@ -374,8 +375,10 @@ public class Mazewar extends JFrame {
                     e.printStackTrace();
                }
              }
-             //new Thread(new PeerSender(out_map,args[3],token,eventQueue)).start();      
+                
              Mazewar mazewar = new Mazewar(out_map, args[3]);
-             mazewar.startThreads();
+             mazewar.startThreads(out_map,args[3]);
+             System.out.println(clientTable.size());
+
         }
 }

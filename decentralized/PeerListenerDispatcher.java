@@ -11,13 +11,15 @@ public class PeerListenerDispatcher extends Thread{
 	private String myself;
 	private Location mylocation;
 	AtomicInteger token ;
+	Hashtable<String, Client> clientTable = null;
 	
-	public PeerListenerDispatcher(ServerSocket serverSocket,ConcurrentHashMap<String,ObjectOutputStream> map,String myself,Location mylocation,AtomicInteger token ){
+	public PeerListenerDispatcher(ServerSocket serverSocket,ConcurrentHashMap<String,ObjectOutputStream> map,String myself,Location mylocation,AtomicInteger token,Hashtable<String, Client> clientTable){
 		this.serverSocket=serverSocket;
 		this.map=map;
 		this.myself=myself;
 		this.mylocation=mylocation;
 		this.token=token;
+		this.clientTable=clientTable;
 	}
 
 
@@ -25,7 +27,7 @@ public class PeerListenerDispatcher extends Thread{
 		try{
 			while(true){
             Socket socket=serverSocket.accept();
-            new Thread(new PeerListener(socket,map,myself,mylocation,token)).start();
+            new Thread(new PeerListener(socket,map,myself,mylocation,token,clientTable)).start();
        		}
 		}catch(Exception e){
 			e.printStackTrace();
