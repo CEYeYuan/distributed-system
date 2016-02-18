@@ -97,6 +97,9 @@ public class PeerListener extends Thread{
 
                 else if(packetFromPeer.type==MPacket.TOKEN){
                 	token.set(packetFromPeer.sequenceNumber);
+                	/*
+					 thread to handle missle
+                	*/
                 	continue;//doing nothing
                 }
 

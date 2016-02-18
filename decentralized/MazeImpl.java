@@ -373,7 +373,8 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                                                 Object o = it.next();
                                                 assert(o instanceof Projectile);
                                                 deadPrj.addAll(moveProjectile((Projectile)o));
-                                        }               
+                                        }     
+                                              
                                         it = deadPrj.iterator();
                                         while(it.hasNext()) {
                                                 Object o = it.next();
