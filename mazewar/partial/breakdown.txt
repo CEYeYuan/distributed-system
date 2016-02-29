@@ -1,0 +1,2 @@
+week1: name service,hashmap(global+client) ip+port
+week2: lamport + sequencing: in order delivering
